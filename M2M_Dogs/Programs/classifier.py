@@ -16,9 +16,11 @@ import shutil
 import matplotlib.pyplot as plt
 
 
-# data_path = '/media/Data/Datasets/Dogs_Breed/'
+#data_path = '/media/Data/Datasets/Dogs_Breed/'
 
-data_path = '/media/Data/Datasets/Cat_Dog_data/'
+#data_path = '/media/Data/Datasets/Cat_Dog_data/'
+
+data_path = '~/Data/Cat_Dog_data/'
 
 nb_classes = len(os.listdir(data_path + 'test'))
 
