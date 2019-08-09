@@ -209,3 +209,8 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/linux,macos,python,windows,visualstudiocode
+
+#Adding personnal folders
+M2M_Dogs/Classifier/
+M2M_Dogs/AE/
+M2M_Dogs/MindGAN/
