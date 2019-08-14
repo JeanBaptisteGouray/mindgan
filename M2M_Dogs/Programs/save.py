@@ -53,14 +53,13 @@ def save_model_IS_FID(IS_max, FID_min, real_images, fake_images, Classifier, Cri
 
     return score_IS, score_FID, IS_max, FID_min, affichage
 
-def save_model_FID(FID_min, real_images, fake_images, Classifier, Critic, Generator, checkpoint_path):
+def save_model_FID(score_FID, FID_min, Critic, Generator, checkpoint_path):
     """
         Compute IS and FID
         Verify is IS or FID is better
         Save the critic and the genrator if it's the case in the foler checkpoint_path
     """
     affichage = False
-    score_FID = evaluate.fid(real_images, fake_images, Classifier)
 
     if  score_FID < FID_min:
         FID_min = score_FID
@@ -68,20 +67,56 @@ def save_model_FID(FID_min, real_images, fake_images, Classifier, Critic, Genera
         torch.save(Generator.state_dict(),checkpoint_path + 'Generator_FID.pth')
         affichage = True 
 
-    return score_FID, FID_min, affichage
+    return FID_min, affichage
+
+def save_model_test_loss(test_loss, test_loss_min, Critic, Generator, checkpoint_path, mode='GAN'):
+    """
+        Save the critic and the genrator if the test_os is better, in the foler checkpoint_path
+    """
+    affichage = False
+
+    train_on_gpu = torch.cuda.is_available()
+
+    if test_loss.item() < test_loss_min:
+        test_loss_min = test_loss.item()
+
+        if train_on_gpu:
+            Critic.cpu()
+            Generator.cpu()
+
+        if mode == 'GAN':
+            torch.save(Critic.state_dict(),checkpoint_path + 'Critic.pth')
+            torch.save(Generator.state_dict(),checkpoint_path + 'Generator.pth')
+        else:
+            torch.save(Critic.state_dict(),checkpoint_path + 'Encoder.pth')
+            torch.save(Generator.state_dict(),checkpoint_path + 'Decoder.pth')
+        
+        if train_on_gpu:
+            Critic.cuda()
+            Generator.cuda()
+        
+        affichage = True
+
+    return test_loss_min, affichage
+
 
 def save_model(test_loss, test_loss_min, classifier, checkpoint_path, train_on_gpu):
 
     affichage = False
 
     if test_loss < test_loss_min:
-        test_loss_min = test_loss.item()
+        test_loss_min = test_loss
+
         if train_on_gpu:
             classifier.cpu()
+
         torch.save(classifier.state_dict(), checkpoint_path + 'classifier.pth')
+        
         if train_on_gpu:
             classifier.cuda()
+
         affichage = True
+
     return test_loss_min, affichage
 
 
@@ -126,7 +161,7 @@ def save_log_classifier(epoch, time, train_loss, test_loss, accuracy, folder) :
             fichier.write('{};{};{};{};{}\n'.format(epoch, time, train_loss, test_loss, accuracy))
 
 
-def save_best(IS_max, FID_min, hyperparameters, folder_src, folder_fin = '.'):
+def save_best_IS_FID(IS_max, FID_min, hyperparameters, folder_src, folder_fin = '.'):
     # folder_src where find Best critic and generator in IS and FID during the training
     """
         Save the critic, the generator and the hyperparameters
@@ -162,46 +197,12 @@ def save_best(IS_max, FID_min, hyperparameters, folder_src, folder_fin = '.'):
         shutil.copyfile(folder_src + '/Critic_FID.pth',folder_FID + 'Critic_FID.pth')
         shutil.copyfile(folder_src + '/Generator_FID.pth',folder_FID + 'Generator_FID.pth')
         shutil.copyfile(folder_src + '/../log.csv', folder_FID + 'log.csv')
-        with open(folder_FID + 'FID.txt', 'w') as fichier:
+        with open(folder_FID + '/FID.txt', 'w') as fichier:
             fichier.write(str(FID_min))
 
-def save_best_AE(FID_min, hyperparameters, Encoder, Decoder, vanilla):
+def save_best_AE(test_loss_min, hyperparameters, folder_src, folder_test_loss='../checkpoints/'):
     """
         Save the Encoder, the Decoder and the hyperparameters
-        if the IS or the FID is better than all the training made yet
-    """
-    
-    folder_FID = 'Best_AE_FID/'
-    
-    if not os.path.exists(folder_FID):
-        os.makedirs(folder_FID)
-        best_FID = np.inf
-    else:
-        with open(folder_FID + 'FID.txt', 'r') as fichier:
-            best_FID = float(fichier.read())
-
-    if FID_min < best_FID:
-        save_hyperparameters(hyperparameters, folder_FID)
-        torch.save(Encoder.state_dict(),folder_FID + 'Encoder_FID.pth')
-        torch.save(Decoder.state_dict(),folder_FID + 'Decoder_FID.pth')
-        with open(folder_FID + 'FID.txt', 'w') as fichier:
-            fichier.write(str(FID_min))
-    
-        # Save also Encoder and decoder in ../checkpoints/Best_AE_FID/
-        folder_FID = '../../checkpoints/AE_' + vanilla + '/Best_AE_FID/'
-
-        if not os.path.exists(folder_FID):
-            os.makedirs(folder_FID)
-
-        save_hyperparameters(hyperparameters, folder_FID)
-        torch.save(Encoder.state_dict(),folder_FID + 'Encoder_FID.pth')
-        torch.save(Decoder.state_dict(),folder_FID + 'Decoder_FID.pth')
-        with open(folder_FID + 'FID.txt', 'w') as fichier:
-            fichier.write(str(FID_min))
-
-def save_best_classifier(test_loss, hyperparameters, folder_src, folder_test_loss='../checkpoints/'):
-    """
-        Save the classifier and the hyperparameters
         if the test_loss is better than all the training made yet
     """
     
@@ -209,15 +210,48 @@ def save_best_classifier(test_loss, hyperparameters, folder_src, folder_test_los
         os.makedirs(folder_test_loss)
         best_test_loss = np.inf
     else:
-        with open(folder_test_loss + 'Best_test_loss/test_loss.txt', 'r') as fichier:
+        with open(folder_test_loss + 'test_loss.txt', 'r') as fichier:
+            best_test_loss = float(fichier.read())
+
+    if test_loss_min < best_test_loss:
+
+        # Save also Encoder and decoder in folder_test_loss
+
+        if not os.path.exists(folder_test_loss):
+            os.makedirs(folder_test_loss)
+
+        save_hyperparameters(hyperparameters, folder_test_loss)
+        shutil.copyfile(folder_src + '/Encoder.pth', folder_test_loss + 'Encoder.pth')
+        shutil.copyfile(folder_src + '/Decoder.pth', folder_test_loss + 'Decoder.pth')
+        shutil.copyfile(folder_src + '/Encoder.pth', folder_test_loss + 'Best_AE/Encoder.pth')
+        shutil.copyfile(folder_src + '/Decoder.pth', folder_test_loss + 'Best_AE/Decoder.pth')
+        shutil.copyfile(folder_src + '/../log.csv', folder_test_loss + 'Best_AE/log.csv')
+        with open(folder_test_loss + 'Best_AE/test_loss.txt', 'w') as fichier:
+            fichier.write(str(test_loss_min))
+
+def save_best_classifier(test_loss, hyperparameters, folder_src, mode=None, folder_test_loss='../checkpoints/'):
+    """
+        Save the classifier and the hyperparameters
+        if the test_loss is better than all the training made yet
+    """
+    
+    if mode:
+        folder_mode = 'Best_Clas_' + mode
+    else:
+        folder_mode = 'Best_Clas'
+
+    if not os.path.exists(folder_test_loss):
+        os.makedirs(folder_test_loss)
+        best_test_loss = np.inf
+    else:
+        with open(folder_test_loss + folder_mode + '/test_loss.txt', 'r') as fichier:
             best_test_loss = float(fichier.read())
 
     if best_test_loss > test_loss:
-        save_hyperparameters(hyperparameters, folder_test_loss + 'Best_test_loss')
-        shutil.copyfile(folder_src + '/classifier.pth', folder_test_loss + 'classifier.pth')
-        shutil.copyfile(folder_src + '/classifier.pth', folder_test_loss + 'Best_test_loss/classifier.pth')
-        shutil.copyfile(folder_src + '/../log.csv', folder_test_loss + 'Best_test_loss/log.csv')
-        with open(folder_test_loss + 'Best_test_loss/test_loss.txt', 'w') as fichier:
+        save_hyperparameters(hyperparameters, folder_test_loss + folder_mode)
+        shutil.copyfile(folder_src + '/classifier.pth', folder_test_loss + folder_mode + '/classifier.pth')
+        shutil.copyfile(folder_src + '/../log.csv', folder_test_loss + folder_mode + '/log.csv')
+        with open(folder_test_loss + folder_mode + '/test_loss.txt', 'w') as fichier:
             fichier.write(str(test_loss))
 
 

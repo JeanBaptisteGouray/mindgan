@@ -1,0 +1,7 @@
+/media/Data/Datasets
+
+classifier_AE = Cat_Dog
+AE = Cat_Dog
+
+classifier_MindGAN = Dog_Breed
+MindGAN = Dog_Breed

@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import os
 import collections
 import pandas as pd
+from scipy import io
+import shutil
 
 from torchvision import transforms, datasets
 import torch
@@ -96,7 +98,7 @@ def select_hyperparameters(file_hyperparameters, separator = ';'):
         line = line.split(separator)
         for i in range(len(line)):
             if line[i] != '':
-                if ',' in line[i]:
+                if ',' in line[i] or 'e' in line[i]:
                     hyperparameters_possible[i].append(float(line[i].replace(',','.')))
                 else:
                     hyperparameters_possible[i].append(int(line[i]))
@@ -144,7 +146,7 @@ def select_hyperparameters_row(file_hyperparameters, separator = ';'):
         
         for i in range(len(line)):
             if line[i] != '':
-                if ',' in line[i] or 'e' in line :
+                if ',' in line[i] or 'e' in line[i] :
                     hyperparameters.append(float(line[i].replace(',','.')))
                 else:
                     hyperparameters.append(int(line[i]))
@@ -228,7 +230,7 @@ class ToTensor(object):
                 'label': torch.from_numpy(label)}
 
 
-def encode_images(data_path, hyperparameters, nb_batch = 100):
+def encode_images(data_path, hyperparameters, transform=transforms.Compose([transforms.ToTensor()]), nb_batch = 100):
 
     folder = '../Encoded_images/AE'
 
@@ -245,11 +247,6 @@ def encode_images(data_path, hyperparameters, nb_batch = 100):
         os.chdir(folder)
         
         latent_size = hyperparameters['latent_size']
-
-        transform = transforms.Compose([transforms.Resize(80),
-                                        transforms.CenterCrop(64),
-                                        transforms.ToTensor()
-                                        ])
 
         train_data = datasets.ImageFolder('../' + data_path, transform=transform)
 
@@ -312,4 +309,288 @@ def recup_scores(score, folder, bigger_is_better=False, nb_values = 10):
                 return np.inf
 
     return Score_mean
+
+def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transforms.ToTensor()]), num_workers=0):
     
+    possible_datasets = ('MNIST', 'FashonMNIST', 'KMNIST', 'SVHN', 'CIFAR10', 'CIFAR100', 'STL10', 'LSUN', 'ImageNet', 'Cat_Dog', 'Doggos_data', 'Dog_Breed')
+
+    if dataset in possible_datasets:
+
+        data_path = data_path + '/' + dataset
+
+        if dataset == 'MNIST':
+
+            train_data = datasets.MNIST(root = data_path + '/train',train=True,transform=transform,download=True)
+            test_data = datasets.MNIST(root = data_path + '/test',train=False,transform=transform,download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'FashionMNIST':
+
+            train_data = datasets.FashionMNIST(root=data_path, train=True, transform=transform, download=True)
+            test_data = datasets.FashionMNIST(root=data_path, train=False, transform=transform, download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'KMNIST':
+
+            train_data = datasets.KMNIST(root=data_path, train=True, transform=transform, download=True)
+            test_data = datasets.KMNIST(root=data_path, train=False, transform=transform, download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers) 
+
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'SVHN':
+            
+            train_data = datasets.SVHN(root=data_path, split='train',transform=transform,download=True)
+            test_data = datasets.SVHN(root=data_path, split='test',transform=transform,download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+            
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'CIFAR10':
+            
+            train_data = datasets.CIFAR10(root=data_path, train=True, transform=transform, download=True)
+            test_data = datasets.CIFAR10(root=data_path, train=False, transform=transform, download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+        
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'CIFAR100':
+
+            train_data = datasets.CIFAR100(root=data_path, train=True, transform=transform, download=True)
+            test_data = datasets.CIFAR100(root=data_path, train=False, transform=transform, download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'STL10':
+
+            train_data = datasets.STL10(root=data_path, split='train', transform=transform, download=True)
+            test_data = datasets.STL10(root=data_path, split='test', transform=transform, download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+            
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'LSUN':
+
+            train_data = datasets.LSUN(data_path + '/' + dataset, classes='train', transform=transform)
+            test_data = datasets.LSUN(data_path + '/' + dataset, classes='test', transform=transform)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'ImageNet':
+
+            train_data = datasets.ImageNet(root=data_path, split='train', download=True)
+            test_data = datasets.ImageNet(root=data_path, split='test', download=True)
+
+            train_loader = torch.utils.data.DataLoader(dataset=train_data,
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    num_workers=num_workers)
+
+            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers)
+
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'Cat_Dog' or dataset == 'Doggos_data' :
+            chemin = data_path.split('/')
+            del chemin[-1]
+            data_path = "/".join(chemin)
+            if not os.path.exists(data_path + '/Cat_Dog'):
+                os.system('wget -cP ' + data_path + ' https://s3.amazonaws.com/content.udacity-data.com/nd089/Cat_Dog_data.zip')
+                print('Decompression des donnees')
+                os.system("unzip -q " + data_path + '/Cat_Dog_data.zip -d ' + data_path)
+                if os.path.exists(data_path + '/__MACOSX'):
+                    os.system('rm -r ' + data_path + '/__MACOSX')
+                os.remove(data_path + '/Cat_Dog_data.zip')
+                os.rename(data_path + '/Cat_Dog_data', data_path + '/Cat_Dog')
+                shutil.copytree(data_path + '/Cat_Dog/train/dog', data_path + '/Doggos_data/train/dog')
+                shutil.copytree(data_path + '/Cat_Dog/test/dog', data_path + '/Doggos_data/test/dog')
+
+            data_path += '/' + dataset
+            
+            train_data = datasets.ImageFolder(data_path + '/train', transform=transform)
+            test_data = datasets.ImageFolder(data_path + '/test', transform=transform)
+
+            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
+        
+            return data_path, train_loader, test_loader
+
+        elif dataset == 'Dog_Breed':
+
+            if not os.path.exists(data_path):
+                os.makedirs(data_path)
+            
+            if not os.path.exists(data_path + '/lists'):
+                # Téléchargement et extraction des listes pour le train et test
+                os.system('wget -cP' + data_path + '/lists http://vision.stanford.edu/aditya86/ImageNetDogs/lists.tar')
+                os.system("tar xvf " + data_path + '/lists/lists.tar -C ' + data_path + '/lists')
+                os.remove(data_path + '/lists/lists.tar')
+                print()
+
+            if not os.path.exists(data_path + '/Images'):
+                # Téléchargement et extraction des images
+                os.system('wget -cP ' + data_path + ' http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar')
+                print('Decompression des images')
+                os.system("tar xf " + data_path + '/images.tar -C ' + data_path )
+                os.remove(data_path + '/images.tar')
+            
+            # Création des dossiers train et test
+            train_dir = data_path + '/train/'
+            test_dir = data_path + '/test/'
+
+            if not os.path.exists(train_dir):
+                os.makedirs(train_dir)
+
+            if len(os.listdir(train_dir)) != 120:
+                train_filenames = io.loadmat(data_path + '/lists/train_list.mat')['annotation_list']
+
+                print('Creation du dataset train')
+                for i in range(train_filenames.shape[0]) :
+                    print('\r{}/{}'.format(i+1, train_filenames.shape[0]), end='')
+                    filename = train_filenames[i][0][0]
+                    dirname = filename.split('/')[0]
+
+                    if not os.path.exists(train_dir + dirname):
+                        os.makedirs(train_dir + dirname)
+                    if not os.path.exists(train_dir + filename + '.jpg') :
+                        shutil.copyfile(data_path + '/Images/' + filename + '.jpg', train_dir + filename + '.jpg')
+                print()
+
+            if not os.path.exists(test_dir) :
+                os.makedirs(test_dir)
+            
+            if len(os.listdir(test_dir)) != 120:
+                test_filenames = io.loadmat(data_path + '/lists/test_list.mat')['annotation_list']
+
+                print('Creation du dataset test')
+                for i in range(test_filenames.shape[0]) :
+                    print('\r{}/{}'.format(i+1, test_filenames.shape[0]), end='')
+                    filename = test_filenames[i][0][0]
+                    dirname = filename.split('/')[0]
+
+                    if not os.path.exists(test_dir + dirname):
+                        os.makedirs(test_dir + dirname)
+
+                    if not os.path.exists(test_dir + filename + '.jpg') :
+                        shutil.copyfile(data_path + '/Images/' + filename + '.jpg', test_dir + filename + '.jpg')
+                print()
+            
+            train_data = datasets.ImageFolder(train_dir, transform=transform)
+            test_data = datasets.ImageFolder(test_dir, transform=transform)
+
+            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
+        
+            return data_path, train_loader, test_loader
+
+    else :
+        print('Veuillez entrer un dataset parmi les propositions suivantes:')
+        
+        for f in possible_datasets :
+            print(f)
+    
+        exit()
+
+def recup_datas(key, filename='datas.txt'):
+    
+    with open(filename, 'r') as fichier:
+        content = fichier.read()
+    
+    content = content.split('\n')
+    
+    data_path = content[0]
+    del content[0]
+    
+    datasets = []
+    keys = []
+    
+    for line in content:
+        if line != '':
+            line = line.split(' = ')
+            keys.append(line[0])
+            datasets.append(line[1])
+    
+    list_dataset = collections.OrderedDict(zip(keys, datasets))
+    
+    return data_path, list_dataset[key]

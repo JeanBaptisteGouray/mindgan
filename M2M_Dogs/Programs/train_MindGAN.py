@@ -14,9 +14,13 @@ import models
 import evaluate
 import save
 
+if not os.path.exists('../checkpoints/Best_Clas_MindGAN/Hyperparameters.txt'):
+    print('Veuillez entrainer un classifieur pour MindGAN!!')
+    exit()
+
 epochs = 200
 
-#os.chdir('/home/lml/gouray/Programs/M2M_pytorch')
+data_path, dataset = utils.recup_datas('MindGAN')
 
 if not os.path.exists('./checkpoints/encoder.pth'):
     print('Missing encoder file')
@@ -76,7 +80,6 @@ save.save_hyperparameters(hyperparameters, folder)
 # Transformation  
 transform = utils.ToTensor()
 
-
 Decoder = models.Generator(64,64,z_size=z_size, latent_size = latent_size,mode='AE', nb_channels=3)
 state_dict = torch.load('../../checkpoints/decoder.pth')
 Decoder.load_state_dict(state_dict)
@@ -84,7 +87,7 @@ Decoder.load_state_dict(state_dict)
 hyperparameters_AE = {'latent_size' : latent_size}
 
 # Encoding images and save them in folder AE_hyperparameters
-filename_encoded_images = utils.encode_images(data_path + 'Doggos_data/train', hyperparameters_AE)
+filename_encoded_images = utils.encode_images(data_path + '/' + dataset + '/train', hyperparameters_AE)
 
 train_data =  utils.EncodedImages(filename_encoded_images, '.', transform=transform)
 
@@ -94,20 +97,36 @@ train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                             num_workers=num_workers,
                                             drop_last=True)
 
+del train_data
+
+nb_classes = len([f for f in os.listdir(data_path + '/' + dataset + '/test') if os.path.isdir(os.path.join(data_path + '/test', f))])
+
+image = next(iter(train_loader))[0][0]
+
+nb_channels = image.shape[0]
+height = image.shape[1]
+width = image.shape[2]
+
+del image
+
+print('Il y a {} classes'.format(nb_classes))
+print('La taille des images est de : ({},{},{})'.format(nb_channels, height, width))
 
 # Parameter for the print
 print_every = len(train_loader)//1
 
 # Creation of the crtic and the generator
 
-C = models.Critic(64,64, latent_size = latent_size, mode='MindGAN', nb_channels=3)
-G = models.Generator(64,64,z_size=z_size, latent_size = latent_size,mode='MindGAN', nb_channels=3)
+C = models.Critic(height, width, latent_size = latent_size, mode='MindGAN', nb_channels=nb_channels)
+G = models.Generator(height, width, z_size=z_size, latent_size = latent_size, mode='MindGAN', nb_channels=nb_channels)
 
 
-# Creation of the classifier which uses to compute the FId and IS
-Classifier = models.Classifier(64,64,2,3,conv_dim=32)
-state_dict = torch.load('../../checkpoints/classifier.pth')
+# Creation of the classifier which uses to compute the FID and IS
+Classifier = models.Pretrain_Classifier(nb_classes)
+state_dict = torch.load('../checkpoints/Best_Clas_MindGAN/classifier.pth')
 Classifier.load_state_dict(state_dict)
+Classifier.eval()
+
 
 # Trainig on GPU if it's possible
 train_on_gpu = torch.cuda.is_available()

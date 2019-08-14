@@ -1,6 +1,6 @@
 #!/bin/bash
 
-nb_diviseur=3
+nb_diviseur=4
 
 if [ $# != '3' -a $# != '4' -a $# != '5' ]
 then
