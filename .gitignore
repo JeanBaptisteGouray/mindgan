@@ -211,6 +211,8 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/linux,macos,python,windows,visualstudiocode
 
 #Adding personnal folders
-M2M_Dogs/Classifier/
+M2M_Dogs/Classifier_AE/
+M2M_Dogs/Classifier_MindGAN/
 M2M_Dogs/AE/
 M2M_Dogs/MindGAN/
+M2M_Dogs/Programs/datas.txt
