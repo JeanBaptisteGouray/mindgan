@@ -53,7 +53,7 @@ save.save_tested_hyperparameters(hyperparameters)
 
 # Hyperparameters for the training
 [batch_size, num_workers, conv_dim, lr, beta1, beta2, epochs] = list(hyperparameters.values())
-
+epochs = 5
 # Folders
 checkpoint_path = folder + '/checkpoints/'
 

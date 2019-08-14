@@ -19,7 +19,7 @@ if not os.path.exists('../checkpoints/Best_Clas_AE/Hyperparameters.txt'):
     print('Veuillez entrainer un classifieur pour AutoEncoder!!')
     exit()
 
-epochs = 200
+epochs = 1
 
 data_path, dataset = utils.recup_datas('AE')
 
@@ -125,9 +125,8 @@ d_optimizer = optim.Adam(Decoder.parameters(), lr, [beta1, beta2])
 criterion = nn.MSELoss()
 
 # Initialisation if IS_max and FID_min
-FID_min = np.inf
+test_loss_min = np.inf
 
-FID_mean = 0.
 # Save the time of start
 start = time.time()
 
@@ -138,10 +137,6 @@ for epoch in range(epochs):
     for real_images, _ in train_loader:
     
         batch_size = real_images.size(0)
-
-        # Rescale images between -1 and 1
-        real_images = utils.scale(real_images)
-
 
         # Move real_images on GPU if we train on GPU
         if train_on_gpu:
@@ -175,9 +170,6 @@ for epoch in range(epochs):
         test_loss = 0.
         score_fid = 0.
         for real_images, _ in test_loader:
-            
-            # Rescale images between -1 and 1
-            real_images = utils.scale(real_images)
 
             # Move images on GPU if we train on GPU
             if train_on_gpu:
@@ -208,7 +200,7 @@ for epoch in range(epochs):
             epoch+1, epochs, time.time()-start, train_loss.item()/len(train_loader), test_loss.item()/len(test_loader),score_fid/len(test_loader)), end=' ')
     
     if affichage:
-        print('| Model')
+        print('| Model saved')
     else:
         print()
 

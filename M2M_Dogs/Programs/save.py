@@ -206,11 +206,11 @@ def save_best_AE(test_loss_min, hyperparameters, folder_src, folder_test_loss='.
         if the test_loss is better than all the training made yet
     """
     
-    if not os.path.exists(folder_test_loss):
-        os.makedirs(folder_test_loss)
+    if not os.path.exists(folder_test_loss + 'Best_AE/'):
+        os.makedirs(folder_test_loss + 'Best_AE/')
         best_test_loss = np.inf
     else:
-        with open(folder_test_loss + 'test_loss.txt', 'r') as fichier:
+        with open(folder_test_loss + 'Best_AE/test_loss.txt', 'r') as fichier:
             best_test_loss = float(fichier.read())
 
     if test_loss_min < best_test_loss:
@@ -221,8 +221,6 @@ def save_best_AE(test_loss_min, hyperparameters, folder_src, folder_test_loss='.
             os.makedirs(folder_test_loss)
 
         save_hyperparameters(hyperparameters, folder_test_loss)
-        shutil.copyfile(folder_src + '/Encoder.pth', folder_test_loss + 'Encoder.pth')
-        shutil.copyfile(folder_src + '/Decoder.pth', folder_test_loss + 'Decoder.pth')
         shutil.copyfile(folder_src + '/Encoder.pth', folder_test_loss + 'Best_AE/Encoder.pth')
         shutil.copyfile(folder_src + '/Decoder.pth', folder_test_loss + 'Best_AE/Decoder.pth')
         shutil.copyfile(folder_src + '/../log.csv', folder_test_loss + 'Best_AE/log.csv')
