@@ -12,7 +12,6 @@ import os
 import numpy as np
 import time
 import shutil
-import collections
 
 data_path, dataset = utils.recup_datas('classifier_AE')
 
@@ -53,7 +52,7 @@ save.save_tested_hyperparameters(hyperparameters)
 
 # Hyperparameters for the training
 [batch_size, num_workers, conv_dim, lr, beta1, beta2, epochs] = list(hyperparameters.values())
-epochs = 5
+
 # Folders
 checkpoint_path = folder + '/checkpoints/'
 
@@ -83,7 +82,7 @@ print('Il y a {} classes'.format(nb_classes))
 print('La taille des images est de : ({},{},{})'.format(nb_channels, height, width))
 
 # Create the Neural networks
-model = models.Pretrain_Classifier(nb_classes)
+model = models.MLP(nb_classes)
 
 # Trainig on GPU if it's possible
 train_on_gpu = torch.cuda.is_available()
@@ -96,7 +95,7 @@ else:
     print('Training on CPU. \n')
 
 # Define optimizer and loss function
-optimizer = optim.Adam(model.classifier.parameters(),lr, [beta1,beta2])
+optimizer = optim.Adam(model.parameters(),lr, [beta1,beta2])
 
 criterion = nn.NLLLoss()
 

@@ -29,15 +29,13 @@ def save_hyperparameters(hyperparameters, folder) :
                 fichier.write(str(key[ii]) + ' = ' + str(value))
 
 
-def save_model_IS_FID(IS_max, FID_min, real_images, fake_images, Classifier, Critic, Generator, checkpoint_path):
+def save_model_IS_FID(score_IS, score_FID, IS_max, FID_min, Critic, Generator, checkpoint_path):
     """
         Compute IS and FID
         Verify is IS or FID is better
         Save the critic and the genrator if it's the case in the foler checkpoint_path
     """
     affichage = False
-    score_IS = evaluate.inception_score(fake_images,Classifier)
-    score_FID = evaluate.fid(real_images, fake_images, Classifier)
 
     if  score_IS > IS_max:
         IS_max = score_IS
@@ -51,7 +49,7 @@ def save_model_IS_FID(IS_max, FID_min, real_images, fake_images, Classifier, Cri
         torch.save(Generator.state_dict(),checkpoint_path + 'Generator_FID.pth')
         affichage = True 
 
-    return score_IS, score_FID, IS_max, FID_min, affichage
+    return IS_max, FID_min, affichage
 
 def save_model_FID(score_FID, FID_min, Critic, Generator, checkpoint_path):
     """
@@ -84,7 +82,7 @@ def save_model_test_loss(test_loss, test_loss_min, Critic, Generator, checkpoint
             Critic.cpu()
             Generator.cpu()
 
-        if mode == 'GAN':
+        if 'GAN' in mode:
             torch.save(Critic.state_dict(),checkpoint_path + 'Critic.pth')
             torch.save(Generator.state_dict(),checkpoint_path + 'Generator.pth')
         else:
@@ -200,14 +198,14 @@ def save_best_IS_FID(IS_max, FID_min, hyperparameters, folder_src, folder_fin = 
         with open(folder_FID + '/FID.txt', 'w') as fichier:
             fichier.write(str(FID_min))
 
-def save_best_AE(test_loss_min, hyperparameters, folder_src, folder_test_loss='../checkpoints/'):
+def save_best_test_loss(test_loss_min, hyperparameters, folder_src, folder_test_loss='../checkpoints/', mode='GAN'):
     """
         Save the Encoder, the Decoder and the hyperparameters
         if the test_loss is better than all the training made yet
     """
     
-    if not os.path.exists(folder_test_loss + 'Best_AE/'):
-        os.makedirs(folder_test_loss + 'Best_AE/')
+    if not os.path.exists(folder_test_loss + 'Best_' + mode):
+        os.makedirs(folder_test_loss + 'Best_' + mode)
         best_test_loss = np.inf
     else:
         with open(folder_test_loss + 'Best_AE/test_loss.txt', 'r') as fichier:
@@ -216,16 +214,22 @@ def save_best_AE(test_loss_min, hyperparameters, folder_src, folder_test_loss='.
     if test_loss_min < best_test_loss:
 
         # Save also Encoder and decoder in folder_test_loss
-
-        if not os.path.exists(folder_test_loss):
-            os.makedirs(folder_test_loss)
-
-        save_hyperparameters(hyperparameters, folder_test_loss)
-        shutil.copyfile(folder_src + '/Encoder.pth', folder_test_loss + 'Best_AE/Encoder.pth')
-        shutil.copyfile(folder_src + '/Decoder.pth', folder_test_loss + 'Best_AE/Decoder.pth')
-        shutil.copyfile(folder_src + '/../log.csv', folder_test_loss + 'Best_AE/log.csv')
-        with open(folder_test_loss + 'Best_AE/test_loss.txt', 'w') as fichier:
-            fichier.write(str(test_loss_min))
+        if 'GAN' in mode:
+            save_hyperparameters(hyperparameters, folder_test_loss + 'Best_' + mode)
+            shutil.copyfile(folder_src + '/Critic.pth', folder_test_loss + 'Best_' + mode + '/Critic.pth')
+            shutil.copyfile(folder_src + 'Generator.pth', folder_test_loss + 'Best_' + mode + '/Generator.pth')
+            shutil.copyfile(folder_src + '/../log.csv', folder_test_loss + 'Best_' + mode + '/log.csv')
+            
+            with open(folder_test_loss + 'Best_GAN/test_loss.txt', 'w') as fichier:
+                fichier.write(str(test_loss_min))
+        else:
+            save_hyperparameters(hyperparameters, folder_test_loss + 'Best_' + mode)
+            shutil.copyfile(folder_src + '/Encoder.pth', folder_test_loss + 'Best_' + mode + '/Encoder.pth')
+            shutil.copyfile(folder_src + '/Decoder.pth', folder_test_loss + 'Best_' + mode + '/Decoder.pth')
+            shutil.copyfile(folder_src + '/../log.csv', folder_test_loss + 'Best_' + mode + '/log.csv')
+        
+            with open(folder_test_loss + 'Best_' + mode + '/test_loss.txt', 'w') as fichier:
+                fichier.write(str(test_loss_min))
 
 def save_best_classifier(test_loss, hyperparameters, folder_src, mode=None, folder_test_loss='../checkpoints/'):
     """
@@ -238,8 +242,9 @@ def save_best_classifier(test_loss, hyperparameters, folder_src, mode=None, fold
     else:
         folder_mode = 'Best_Clas'
 
-    if not os.path.exists(folder_test_loss):
-        os.makedirs(folder_test_loss)
+    if not os.path.exists(folder_test_loss + folder_mode + '/test_loss.txt'):
+        if not os.path.exists(folder_test_loss + folder_mode):
+            os.makedirs(folder_test_loss + folder_mode)
         best_test_loss = np.inf
     else:
         with open(folder_test_loss + folder_mode + '/test_loss.txt', 'r') as fichier:

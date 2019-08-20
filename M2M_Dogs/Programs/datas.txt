@@ -1,4 +1,4 @@
-/media/Data/Datasets
+~/Datasets/
 
 classifier_AE = Cat_Dog
 AE = Cat_Dog

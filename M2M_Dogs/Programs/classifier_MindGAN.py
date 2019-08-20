@@ -12,9 +12,11 @@ import os
 import numpy as np
 import time
 import shutil
-import matplotlib.pyplot as plt
 
-data_path, dataset = utils.recup_datas('classifier_AE')
+data_path, dataset = utils.recup_datas('classifier_MindGAN')
+
+print('Les datasets se trouvent a l\'emplacement :', data_path)
+print('Le dataset utilise est :', dataset)
 
 folder = '../Classifier_MindGAN'
 
@@ -80,7 +82,7 @@ print('Il y a {} classes'.format(nb_classes))
 print('La taille des images est de : ({},{},{})'.format(nb_channels, height, width))
 
 # Create the Neural networks
-model = models.Pretrain_Classifier(nb_classes)
+model = models.MLP(nb_classes)
 
 # Trainig on GPU if it's possible
 train_on_gpu = torch.cuda.is_available()
@@ -93,7 +95,7 @@ else:
     print('Training on CPU. \n')
 
 # Define optimizer and loss function
-optimizer = optim.Adam(model.classifier.parameters(),lr, [beta1,beta2])
+optimizer = optim.Adam(model.parameters(),lr, [beta1,beta2])
 
 criterion = nn.NLLLoss()
 

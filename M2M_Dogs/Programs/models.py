@@ -140,8 +140,22 @@ class Classifier(nn.Module):
         return x
 
 class MLP(nn.Module):
-    def __init__(self, in_dim, hidden_units, out_dim):
+    def __init__(self,out_dim, hidden_units = [1024],transfer = None):
         super(MLP, self).__init__()
+        if transfer == None or transfer == 'densenet121':
+            self.model = pretrain.densenet121(pretrained=True)
+            in_dim = 1024
+
+        if transfer == 'resnet101':
+            self.model = pretrain.densenet121(pretrained=True)
+            in_dim = 2048
+
+        if transfer == 'vgg19':
+            self.model = pretrain.vgg19(pretrained=True)
+            in_dim = 25088
+
+        for param in self.model.parameters():
+            param.requires_grad = False
         if len(hidden_units)==0:
             layers = [nn.Linear(in_dim,out_dim)]
         else:
@@ -153,36 +167,38 @@ class MLP(nn.Module):
             layers.append(nn.Linear(hidden_units[-1],out_dim))
 
         self.sequential = nn.Sequential(*layers)
+        self.model.classifier = self.sequential
+        self.parameters = self.model.classifier.parameters
 
     def forward(self, x,get_activations = False):
-        x = self.sequential(x)
+        x = self.model.forward(x)
         if not get_activations:
             x = F.log_softmax(x, dim = 1)
             
         return x
 
 
-def Pretrain_Classifier(nb_classes, transfer = None,hidden_units = [1024]):
+# def Pretrain_Classifier(nb_classes, transfer = None,hidden_units = [1024]):
 
-    if transfer == None or transfer == 'densenet121':
-        model = pretrain.densenet121(pretrained=True)
-        in_dim = 1024
+#     if transfer == None or transfer == 'densenet121':
+#         model = pretrain.densenet121(pretrained=True)
+#         in_dim = 1024
 
-    if transfer == 'resnet101':
-        model = pretrain.densenet121(pretrained=True)
-        in_dim = 2048
+#     if transfer == 'resnet101':
+#         model = pretrain.densenet121(pretrained=True)
+#         in_dim = 2048
 
-    if transfer == 'vgg19':
-        model = pretrain.vgg19(pretrained=True)
-        in_dim = 25088
+#     if transfer == 'vgg19':
+#         model = pretrain.vgg19(pretrained=True)
+#         in_dim = 25088
 
-    for param in model.parameters():
-        param.requires_grad = False
+#     for param in model.parameters():
+#         param.requires_grad = False
 
-    Classifier = MLP(in_dim = in_dim, hidden_units=hidden_units, out_dim=nb_classes)
-    model.classifier = Classifier
+#     Classifier = MLP(in_dim = in_dim, hidden_units=hidden_units, out_dim=nb_classes)
+#     model.classifier = Classifier
 
-    return model
+#     return model
 
 def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, layer_norm=True):
     """Creates a convolutional layer, with optional batch normalization.

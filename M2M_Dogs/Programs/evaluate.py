@@ -4,6 +4,25 @@ import torch.nn as nn
 import numpy as np
 from scipy import linalg
 
+def inception_score(images,classifier):
+    """
+        Compute the Inception Score 
+    """
+    with torch.no_grad():
+        if torch.cuda.is_available():
+            images = images.cuda()
+            classifier.cuda()
+
+        classifier.eval()
+
+        log_pyx = classifier.forward(images, get_activations=True)
+        pyx = torch.exp(log_pyx)
+        py = torch.mean(pyx,dim = 0)
+        kl_div = torch.sum(pyx * (log_pyx - torch.log(py)),dim = 1)
+
+        classifier.train()
+
+    return torch.exp(torch.mean(kl_div,dim = 0)).item()
 
 def calculate_activation_statistics(images, classifier):
     """
