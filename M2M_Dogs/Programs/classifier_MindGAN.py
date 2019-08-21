@@ -12,6 +12,7 @@ import os
 import numpy as np
 import time
 import shutil
+import matplotlib.pyplot as plt
 
 data_path, dataset = utils.recup_datas('classifier_MindGAN')
 

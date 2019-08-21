@@ -1,7 +1,6 @@
 #!/bin/bash
 
-
-nb_diviseur=3
+# nb_diviseur=3
 
 if [ $# != '2' -a $# != '3'  ]
 then
@@ -40,16 +39,16 @@ nb_wgan=$(($nb_wgan - $nb_wgan_test))
 
 if [ $train_on_gpu -ne 0 ]
 then
-    info=$(nvidia-smi --query-gpu=memory.total --format=csv) 
-    List_info=(${info////})    
-    free_mem=${List_info[2]}
-    mem_min=$(($free_mem/$nb_diviseur))
+    # info=$(nvidia-smi --query-gpu=memory.total --format=csv) 
+    # List_info=(${info////})    
+    # free_mem=${List_info[2]}
+    # mem_min=$(($free_mem/$nb_diviseur))
     mem_min=3000
 else
-    info=$(free -m | grep "Mem") 
-    List_info=(${info////})    
-    free_mem=${List_info[3]}
-    mem_min=$(($free_mem/$nb_diviseur))
+    # info=$(free -m | grep "Mem") 
+    # List_info=(${info////})    
+    # free_mem=${List_info[3]}
+    # mem_min=$(($free_mem/$nb_diviseur))
     mem_min=3000
 fi
 
@@ -72,8 +71,14 @@ do
         k=2
         while [ $k -lt ${#info[@]} ]
         do
-            free_mem=$((free_mem + ${info[$k]}))
-            k=$((k+2))
+            free_mem=$((${info[$k]}))
+            if [ $free_mem -ge $mem_min ]
+            then
+                GPU=$((k/2-1))
+                k=${#info[@]}
+            else
+                k=$((k+2))
+            fi
         done
     else
         info=$(free -m | grep "Mem") 
@@ -88,8 +93,20 @@ do
         if [ $train_on_gpu -ne 0 ]
         then
             info=$(nvidia-smi --query-gpu=memory.free --format=csv) 
-            List_info=(${info////})    
-            free_mem=${List_info[2]}
+            info=(${info////})
+            free_mem=0
+            k=2
+            while [ $k -lt ${#info[@]} ]
+            do
+                free_mem=$((${info[$k]}))
+                if [ $free_mem -ge $mem_min ]
+                then
+                    GPU=$((k/2-1))
+                    k=${#info[@]}
+                else
+                    k=$((k+2))
+                fi
+            done
         else
             info=$(free -m | grep "Mem") 
             List_info=(${info////})    
@@ -98,7 +115,7 @@ do
         wait=1
     done
 
-    nohup python3 $prog &> ../Logs_$prog/log_$i.log &
+    CUDA_VISIBLE_DEVICES="$GPU" nohup python3 $prog &> ../Logs_$prog/log_$i.log &
     
     launch=$(date)
 
@@ -106,7 +123,7 @@ do
     then
         echo -e '\n\n'
     fi
-    echo -e $i '/' $nb_wgan 'training launched ' $launch '\t|\tPID' $! '\t|\tFree memory : '$free_mem
+    echo -e $i '/' $nb_wgan 'training launched ' $launch ' | PID:' $! ' | GPU: ' $GPU ' | Free memory: '$free_mem
 
     ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch"
 

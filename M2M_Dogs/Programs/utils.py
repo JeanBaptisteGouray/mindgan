@@ -481,8 +481,8 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.ImageFolder(data_path + '/train', transform=transform)
             test_data = datasets.ImageFolder(data_path + '/test', transform=transform)
 
-            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
-            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
+            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True,num_workers = 32,pin_memory = True)
+            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size,num_workers = 32, pin_memory = True)
         
             return data_path, train_loader, test_loader
 
@@ -491,21 +491,22 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             if not os.path.exists(data_path):
                 os.makedirs(data_path)
             
-            if not os.path.exists(data_path + '/lists'):
-                # Téléchargement et extraction des listes pour le train et test
-                if not os.path.exists(data_path + '/lists//lists.tar'):
-                    os.system('wget -cP' + data_path + '/lists http://vision.stanford.edu/aditya86/ImageNetDogs/lists.tar')
-                os.system("tar xvf " + data_path + '/lists/lists.tar -C ' + data_path + '/lists')
-                os.remove(data_path + '/lists/lists.tar')
-                print()
+            if not os.path.exists(data_path + '/train') or not os.path.exists(data_path + '/test'):
+                if not os.path.exists(data_path + '/lists'):
+                    # Téléchargement et extraction des listes pour le train et test
+                    if not os.path.exists(data_path + '/lists//lists.tar'):
+                        os.system('wget -cP' + data_path + '/lists http://vision.stanford.edu/aditya86/ImageNetDogs/lists.tar')
+                    os.system("tar xvf " + data_path + '/lists/lists.tar -C ' + data_path + '/lists')
+                    os.remove(data_path + '/lists/lists.tar')
+                    print()
 
-            if not os.path.exists(data_path + '/Images/train') or not os.path.exists(data_path + '/Images/test'):
-                # Téléchargement et extraction des images
-                if not os.path.exists(data_path + '/images.tar'):
-                    os.system('wget -cP ' + data_path + ' http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar')
-                print('Decompression des images')
-                os.system("tar xf " + data_path + '/images.tar -C ' + data_path )
-                os.remove(data_path + '/images.tar')
+                if not os.path.exists(data_path + '/Images'):
+                    # Téléchargement et extraction des images
+                    if not os.path.exists(data_path + '/images.tar'):
+                        os.system('wget -cP ' + data_path + ' http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar')
+                    print('Decompression des images')
+                    os.system("tar xf " + data_path + '/images.tar -C ' + data_path )
+                    os.remove(data_path + '/images.tar')
             
             # Création des dossiers train et test
             train_dir = data_path + '/train/'

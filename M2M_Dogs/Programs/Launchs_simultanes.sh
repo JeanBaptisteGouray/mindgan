@@ -79,8 +79,14 @@ do
         k=2
         while [ $k -lt ${#info[@]} ]
         do
-            free_mem=$((free_mem + ${info[$k]}))
-            k=$((k+2))
+            free_mem=$((${info[$k]}))
+            if [ $free_mem -ge $mem_min ]
+            then
+                GPU=$((k/2-1))
+                k=${#info[@]}
+            else
+                k=$((k+2))
+            fi
         done
     else
         info=$(free -m | grep "Mem") 
@@ -95,8 +101,20 @@ do
         if [ $train_on_gpu -ne 0 ]
         then
             info=$(nvidia-smi --query-gpu=memory.free --format=csv) 
-            List_info=(${info////})    
-            free_mem=${List_info[2]}
+            info=(${info////})
+            free_mem=0
+            k=2
+            while [ $k -lt ${#info[@]} ]
+            do
+                free_mem=$((${info[$k]}))
+                if [ $free_mem -ge $mem_min ]
+                then
+                    GPU=$((k/2-1))
+                    k=${#info[@]}
+                else
+                    k=$((k+2))
+                fi
+            done
         else
             info=$(free -m | grep "Mem") 
             List_info=(${info////})    
