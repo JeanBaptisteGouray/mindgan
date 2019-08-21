@@ -299,7 +299,7 @@ def recup_scores(score, folder, bigger_is_better=False, nb_values = 10):
 
     return Score_mean
 
-def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transforms.ToTensor()]), num_workers=0):
+def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transforms.ToTensor()]), num_workers=0, pin_memory=False):
     
     possible_datasets = ('MNIST', 'FashionMNIST', 'KMNIST', 'SVHN', 'CIFAR10', 'CIFAR100', 'STL10', 'LSUN', 'ImageNet', 'Cat_Dog', 'Doggos_data', 'Dog_Breed')
 
@@ -315,12 +315,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader(dataset=train_data,
                                                     batch_size=batch_size,
                                                     shuffle=True,
-                                                    num_workers=num_workers)
+                                                    num_workers=num_workers,
+                                                    pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
 
             return data_path, train_loader, test_loader
 
@@ -329,15 +331,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.FashionMNIST(root=data_path, train=True, transform=transform, download=True)
             test_data = datasets.FashionMNIST(root=data_path, train=False, transform=transform, download=True)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
 
             return data_path, train_loader, test_loader
 
@@ -346,15 +350,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.KMNIST(root=data_path, train=True, transform=transform, download=True)
             test_data = datasets.KMNIST(root=data_path, train=False, transform=transform, download=True)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers) 
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory) 
 
             return data_path, train_loader, test_loader
 
@@ -363,15 +369,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.SVHN(root=data_path, split='train',transform=transform,download=True)
             test_data = datasets.SVHN(root=data_path, split='test',transform=transform,download=True)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
             
             return data_path, train_loader, test_loader
 
@@ -380,15 +388,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.CIFAR10(root=data_path, train=True, transform=transform, download=True)
             test_data = datasets.CIFAR10(root=data_path, train=False, transform=transform, download=True)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
         
             return data_path, train_loader, test_loader
 
@@ -397,15 +407,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.CIFAR100(root=data_path, train=True, transform=transform, download=True)
             test_data = datasets.CIFAR100(root=data_path, train=False, transform=transform, download=True)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
 
             return data_path, train_loader, test_loader
 
@@ -414,15 +426,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.STL10(root=data_path, split='train', transform=transform, download=True)
             test_data = datasets.STL10(root=data_path, split='test', transform=transform, download=True)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
             
             return data_path, train_loader, test_loader
 
@@ -431,15 +445,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.LSUN(data_path + '/' + dataset, classes='train', transform=transform)
             test_data = datasets.LSUN(data_path + '/' + dataset, classes='test', transform=transform)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
 
             return data_path, train_loader, test_loader
 
@@ -448,15 +464,17 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.ImageNet(root=data_path, split='train', download=True)
             test_data = datasets.ImageNet(root=data_path, split='test', download=True)
 
-            train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                                    batch_size=batch_size,
-                                                    shuffle=True,
-                                                    num_workers=num_workers)
-
-            test_loader = torch.utils.data.DataLoader(dataset=test_data,
+            train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
-                                                        num_workers=num_workers)
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
+
+            test_loader = torch.utils.data.DataLoader(  dataset=test_data,
+                                                        batch_size=batch_size,
+                                                        shuffle=True,
+                                                        num_workers=num_workers,
+                                                        pin_memory=pin_memory)
 
             return data_path, train_loader, test_loader
 
@@ -481,8 +499,8 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.ImageFolder(data_path + '/train', transform=transform)
             test_data = datasets.ImageFolder(data_path + '/test', transform=transform)
 
-            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True,num_workers = 32,pin_memory = True)
-            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size,num_workers = 32, pin_memory = True)
+            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, pin_memory=pin_memory)
         
             return data_path, train_loader, test_loader
 
@@ -552,8 +570,8 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.ImageFolder(train_dir, transform=transform)
             test_data = datasets.ImageFolder(test_dir, transform=transform)
 
-            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
-            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
+            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, pin_memory=pin_memory)
         
             return data_path, train_loader, test_loader
 

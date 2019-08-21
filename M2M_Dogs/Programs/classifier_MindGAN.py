@@ -13,6 +13,13 @@ import numpy as np
 import time
 import shutil
 
+torch.backends.cudnn.benchmark = True
+
+batch_size = 128
+epochs = 100
+num_workers = 32
+pin_memory = True
+
 data_path, dataset = utils.recup_datas('classifier_MindGAN')
 
 print('Les datasets se trouvent a l\'emplacement :', data_path)
@@ -51,7 +58,7 @@ save.save_hyperparameters(hyperparameters, folder)
 save.save_tested_hyperparameters(hyperparameters)
 
 # Hyperparameters for the training
-[batch_size, num_workers, conv_dim, lr, beta1, beta2, epochs] = list(hyperparameters.values())
+[lr, beta1, beta2] = list(hyperparameters.values())
 
 # Folders
 checkpoint_path = folder + '/checkpoints/'
@@ -66,7 +73,7 @@ transform = transforms.Compose([transforms.Resize(140),
                                 transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
                                 ])
 
-data_path, train_loader, test_loader = utils.dataset(data_path, dataset, batch_size, transform)
+data_path, train_loader, test_loader = utils.dataset(data_path, dataset, batch_size, transform, num_workers=num_workers, pin_memory=pin_memory)
 
 nb_classes = len([f for f in os.listdir(data_path + '/test') if os.path.isdir(os.path.join(data_path + '/test', f))])
 
