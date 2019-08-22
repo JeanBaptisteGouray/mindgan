@@ -142,7 +142,7 @@ class Classifier(nn.Module):
 class MLP(nn.Module):
     def __init__(self,out_dim, hidden_units = [1024],transfer = 'densenet121', nb_channels=1, conv_dim = 32, p=0.00125,height = 28, width = 28):
         super(MLP, self).__init__()
-
+        self.transfer = transfer
         if transfer is not None:
             if transfer == 'densenet121':
                 self.model = pretrain.densenet121(pretrained=True)
@@ -172,7 +172,7 @@ class MLP(nn.Module):
             self.model.classifier = self.sequential
             self.parameters = self.model.classifier.parameters
         else:
-            self.transfer = None
+            
             self.conv1 = conv(nb_channels,conv_dim,3,1,1)      # dim : H/2, W/2
             self.conv2 = conv(conv_dim,2*conv_dim,3,1,1)       # dim : H/4, W/4
             self.conv3 = conv(2*conv_dim,4*conv_dim,3,1,1)     # dim : H/8, W/8
