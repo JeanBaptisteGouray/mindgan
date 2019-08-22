@@ -73,9 +73,7 @@ transform = transforms.Compose([transforms.Resize(140),
                                 transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
                                 ])
 
-data_path, train_loader, test_loader = utils.dataset(data_path, dataset, batch_size, transform, num_workers=num_workers, pin_memory=pin_memory)
-
-nb_classes = len([f for f in os.listdir(data_path + '/test') if os.path.isdir(os.path.join(data_path + '/test', f))])
+data_path, train_loader, test_loader, nb_classes = utils.dataset(data_path, dataset, batch_size, transform, num_workers=num_workers, pin_memory=pin_memory)
 
 image = next(iter(train_loader))[0][0]
 

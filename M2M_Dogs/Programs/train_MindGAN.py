@@ -85,7 +85,7 @@ transform = transforms.Compose([transforms.Resize(140),
                                 ])
 
 # Encoding images and save them in folder AE_hyperparameters
-filename_encoded_images, height, width, nb_channels = utils.encode_images(data_path, dataset, hyperparameters_AE, transform=transform)
+filename_encoded_images, nb_classes, height, width, nb_channels = utils.encode_images(data_path, dataset, hyperparameters_AE, transform=transform)
 
 train_data =  utils.EncodedImages(filename_encoded_images, '.', transform=transform)
 
@@ -95,8 +95,6 @@ train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                             num_workers=num_workers,
                                             drop_last=True)
 del train_data
-
-nb_classes = len([f for f in os.listdir(data_path + '/' + dataset + '/test') if os.path.isdir(os.path.join(data_path + '/' + dataset + '/test', f))])
 
 print('Il y a {} classes'.format(nb_classes))
 print('La taille des images est de : ({},{},{})'.format(nb_channels, height, width))

@@ -226,7 +226,7 @@ def encode_images(data_path, str_dataset, hyperparameters, transform=transforms.
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    _, train_loader, _ = dataset(data_path, str_dataset, batch_size, transform=transform)
+    _, train_loader, _, nb_classe = dataset(data_path, str_dataset, batch_size, transform=transform)
 
     image = next(iter(train_loader))[0][0]
 
@@ -273,7 +273,7 @@ def encode_images(data_path, str_dataset, hyperparameters, transform=transforms.
 
         print('Fin de l\'encodage des images')
 
-    return folder + filename, height, width, nb_channels
+    return folder + filename, nb_classe, height, width, nb_channels
 
 def recup_scores(score, folder, bigger_is_better=False, nb_values = 10):
 
@@ -324,7 +324,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
-            return data_path, train_loader, test_loader
+            nb_classe = 10
 
         elif dataset == 'FashionMNIST':
 
@@ -342,8 +342,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         shuffle=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
-
-            return data_path, train_loader, test_loader
+            nb_classe =10
 
         elif dataset == 'KMNIST':
 
@@ -361,8 +360,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         shuffle=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory) 
-
-            return data_path, train_loader, test_loader
+            nb_classe = 10
 
         elif dataset == 'SVHN':
             
@@ -381,7 +379,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
             
-            return data_path, train_loader, test_loader
+            nb_classe = 10
 
         elif dataset == 'CIFAR10':
             
@@ -400,7 +398,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
         
-            return data_path, train_loader, test_loader
+            nb_classe = 10
 
         elif dataset == 'CIFAR100':
 
@@ -419,7 +417,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
-            return data_path, train_loader, test_loader
+            nb_classe = 100
 
         elif dataset == 'STL10':
 
@@ -437,8 +435,8 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         shuffle=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
-            
-            return data_path, train_loader, test_loader
+
+            nb_classe = 10
 
         elif dataset == 'LSUN':
 
@@ -457,7 +455,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
-            return data_path, train_loader, test_loader
+            nb_classe = 10
 
         elif dataset == 'ImageNet':
 
@@ -476,7 +474,7 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
-            return data_path, train_loader, test_loader
+            nb_classe = 1000
 
         elif dataset == 'Cat_Dog' or dataset == 'Doggos_data' :
             chemin = data_path.split('/')
@@ -501,8 +499,8 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
 
             train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
             test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, pin_memory=pin_memory)
-        
-            return data_path, train_loader, test_loader
+
+            nb_classe = 2
 
         elif dataset == 'Dog_Breed':
 
@@ -572,8 +570,10 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
 
             train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
             test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, pin_memory=pin_memory)
+
+            nb_classe = 120
         
-            return data_path, train_loader, test_loader
+        return data_path, train_loader, test_loader, nb_classe 
 
     else :
         print('Veuillez entrer un dataset parmi les propositions suivantes:')
@@ -590,18 +590,15 @@ def recup_datas(key, filename='datas.txt'):
     
     content = content.split('\n')
     
-    data_path = content[0]
-    del content[0]
-    
     datasets = []
     keys = []
     
     for line in content:
-        if line != '':
+        if line != '' and '#' not in line:
             line = line.split(' = ')
             keys.append(line[0])
             datasets.append(line[1])
     
     list_dataset = collections.OrderedDict(zip(keys, datasets))
     
-    return data_path, list_dataset[key]
+    return list_dataset['path'], list_dataset[key]
