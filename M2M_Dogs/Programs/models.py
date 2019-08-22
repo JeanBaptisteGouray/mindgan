@@ -140,38 +140,55 @@ class Classifier(nn.Module):
         return x
 
 class MLP(nn.Module):
-    def __init__(self,out_dim, hidden_units = [1024],transfer = None):
+    def __init__(self,out_dim, hidden_units = [1024],transfer = 'densenet121', nb_channels=1, conv_dim = 32, p=0.00125,height = 28, width = 28):
         super(MLP, self).__init__()
-        if transfer == None or transfer == 'densenet121':
-            self.model = pretrain.densenet121(pretrained=True)
-            in_dim = 1024
 
-        if transfer == 'resnet101':
-            self.model = pretrain.densenet121(pretrained=True)
-            in_dim = 2048
+        if transfer is not None:
+            if transfer == 'densenet121':
+                self.model = pretrain.densenet121(pretrained=True)
+                in_dim = 1024
 
-        if transfer == 'vgg19':
-            self.model = pretrain.vgg19(pretrained=True)
-            in_dim = 25088
+            if transfer == 'resnet101':
+                self.model = pretrain.densenet121(pretrained=True)
+                in_dim = 2048
 
-        for param in self.model.parameters():
-            param.requires_grad = False
-        if len(hidden_units)==0:
-            layers = [nn.Linear(in_dim,out_dim)]
+            if transfer == 'vgg19':
+                self.model = pretrain.vgg19(pretrained=True)
+                in_dim = 25088
+
+            for param in self.model.parameters():
+                param.requires_grad = False
+            if len(hidden_units)==0:
+                layers = [nn.Linear(in_dim,out_dim)]
+            else:
+                layers = [nn.Linear(in_dim,hidden_units[0]),nn.ReLU()]
+                if len(hidden_units) > 1:
+                    for i in range(len(hidden_units)-1):
+                        layers.append(nn.Linear(hidden_units[i],hidden_units[i+1]))
+                        layers.append(nn.ReLU())
+                layers.append(nn.Linear(hidden_units[-1],out_dim))
+
+            self.sequential = nn.Sequential(*layers)
+            self.model.classifier = self.sequential
+            self.parameters = self.model.classifier.parameters
         else:
-            layers = [nn.Linear(in_dim,hidden_units[0]),nn.ReLU()]
-            if len(hidden_units) > 1:
-                for i in range(len(hidden_units)-1):
-                    layers.append(nn.Linear(hidden_units[i],hidden_units[i+1]))
-                    layers.append(nn.ReLU())
-            layers.append(nn.Linear(hidden_units[-1],out_dim))
+            self.transfer = None
+            self.conv1 = conv(nb_channels,conv_dim,3,1,1)      # dim : H/2, W/2
+            self.conv2 = conv(conv_dim,2*conv_dim,3,1,1)       # dim : H/4, W/4
+            self.conv3 = conv(2*conv_dim,4*conv_dim,3,1,1)     # dim : H/8, W/8
+            self.fc = nn.Linear(int(height/8)*int(width/8)*4*conv_dim,out_dim)
+            self.pool = nn.MaxPool2d(2,2)
+            self.drop = nn.Dropout(p=p)
 
-        self.sequential = nn.Sequential(*layers)
-        self.model.classifier = self.sequential
-        self.parameters = self.model.classifier.parameters
+            layers = [self.conv1,nn.ReLU(),self.pool,self.drop,self.conv2,nn.ReLU(),self.pool,self.drop,self.conv3,nn.ReLU(),self.pool,Flatten(),self.fc]
+            self.sequential = nn.Sequential(*layers)
+        
 
     def forward(self, x,get_activations = False):
-        x = self.model.forward(x)
+        if self.transfer is not None:
+            x = self.model.forward(x)
+        else:
+            x = self.sequential(x)
         if not get_activations:
             x = F.log_softmax(x, dim = 1)
             
@@ -233,3 +250,7 @@ def Tconv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_nor
      
     # using Sequential container
     return nn.Sequential(*layers)
+
+class Flatten(nn.Module):
+    def forward(self, input):
+        return input.view(input.size(0), -1)
