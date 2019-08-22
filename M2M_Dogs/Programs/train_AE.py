@@ -15,6 +15,16 @@ import models
 import evaluate
 import save
 
+seed = 56356274
+
+torch.manual_seed(seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(seed)
+np.random.seed(seed) 
+
+torch.backends.cudnn.benchmark = True
+
+
 if not os.path.exists('../checkpoints/Best_Clas_AE/Hyperparameters.txt'):
     print('Veuillez entrainer un classifieur pour AutoEncoder!!')
     exit()
