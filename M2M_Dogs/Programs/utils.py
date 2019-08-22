@@ -215,7 +215,7 @@ class EncodedImages(torch.utils.data.Dataset):
         return sample
 
 
-def encode_images(data_path, str_dataset, hyperparameters, transform=transforms.Compose([transforms.ToTensor()]), batch_size = 100):
+def encode_images(data_path, str_dataset, hyperparameters, transform=transforms.Compose([transforms.ToTensor()]), num_workers=0, pin_memory=False, batch_size = 100):
 
     folder = '../Encoded_images/AE'
     filename = '/encoded_images.csv'
@@ -226,7 +226,7 @@ def encode_images(data_path, str_dataset, hyperparameters, transform=transforms.
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    _, train_loader, _, nb_classe = dataset(data_path, str_dataset, batch_size, transform=transform)
+    _, train_loader, _, nb_classe = dataset(data_path, str_dataset, batch_size, transform=transform, num_workers=num_workers, pin_memory=pin_memory)
 
     image = next(iter(train_loader))[0][0]
 

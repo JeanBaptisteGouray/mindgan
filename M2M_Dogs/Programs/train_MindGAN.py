@@ -13,6 +13,14 @@ import models
 import evaluate
 import save
 
+if not os.path.exists('../checkpoints/Best_Clas_MindGAN/Hyperparameters.txt'):
+    print('Veuillez entrainer un classifieur pour MindGAN!!')
+    exit()
+
+if not os.path.exists('../checkpoints/Best_AE/Encoder.pth'):
+    print('Missing encoder file')
+    exit()
+
 seed = 56356274
 
 torch.manual_seed(seed)
@@ -22,15 +30,9 @@ np.random.seed(seed)
 
 torch.backends.cudnn.benchmark = True
 
-if not os.path.exists('../checkpoints/Best_Clas_MindGAN/Hyperparameters.txt'):
-    print('Veuillez entrainer un classifieur pour MindGAN!!')
-    exit()
-
-if not os.path.exists('../checkpoints/Best_AE/Encoder.pth'):
-    print('Missing encoder file')
-    exit()
-    
 epochs = 200
+num_workers = 32
+pin_memory = True
 
 data_path, dataset = utils.recup_datas('MindGAN')
 
@@ -94,7 +96,7 @@ transform = transforms.Compose([transforms.Resize(140),
                                 ])
 
 # Encoding images and save them in folder AE_hyperparameters
-filename_encoded_images, nb_classes, height, width, nb_channels = utils.encode_images(data_path, dataset, hyperparameters_AE, transform=transform)
+filename_encoded_images, nb_classes, height, width, nb_channels = utils.encode_images(data_path, dataset, hyperparameters_AE, transform=transform, num_workers=num_workers, pin_memory=pin_memory)
 
 train_data =  utils.EncodedImages(filename_encoded_images, '.', transform=transform)
 
@@ -102,6 +104,7 @@ train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                             batch_size=batch_size,
                                             shuffle=True,
                                             num_workers=num_workers,
+                                            pin_memory=pin_memory,
                                             drop_last=True)
 del train_data
 
