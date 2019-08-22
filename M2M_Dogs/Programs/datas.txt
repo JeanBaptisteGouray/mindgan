@@ -1,6 +1,4 @@
-#path = /home/elie.delplace/Datasets
-
-path = /home/elie/Documents/Datasets
+path = /home/elie.delplace/Datasets
 
 classifier_AE = Cat_Dog
 AE = Cat_Dog
