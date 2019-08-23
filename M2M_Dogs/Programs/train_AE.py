@@ -27,6 +27,7 @@ if torch.cuda.is_available():
 np.random.seed(seed) 
 
 torch.backends.cudnn.benchmark = True
+batch_size = 128
 num_workers = 32
 pin_memory = True
 epochs = 200
@@ -69,7 +70,7 @@ save.save_tested_hyperparameters(hyperparameters)
 save.save_hyperparameters(hyperparameters, folder)
 
 # Hyperparameters for the training
-[batch_size, num_workers, z_size, lr, beta1, beta2, latent_size] = list(hyperparameters.values())
+[lr, beta1, beta2, latent_size] = list(hyperparameters.values())
 
 # Folders
 checkpoint_path = folder + '/checkpoints/'
@@ -107,7 +108,7 @@ print_every = len(train_loader)//1
 
 # Creation of the crtic and the generator
 Encoder = models.Critic(height, width, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
-Decoder = models.Generator(height, width, z_size=z_size, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
+Decoder = models.Generator(height, width, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
 
 # Creation of the classifier which uses to compute the FId and IS
 Classifier = models.MLP(nb_classes)

@@ -97,7 +97,7 @@ def select_hyperparameters(file_hyperparameters, separator = ';'):
         line = line.split(separator)
         for i in range(len(line)):
             if line[i] != '':
-                if ',' in line[i] or 'e' in line[i]:
+                if ',' in line[i] or 'e' in line[i] or 'E' in line[i]:
                     hyperparameters_possible[i].append(float(line[i].replace(',','.')))
                 else:
                     hyperparameters_possible[i].append(int(line[i]))
@@ -145,7 +145,7 @@ def select_hyperparameters_row(file_hyperparameters, separator = ';'):
         
         for i in range(len(line)):
             if line[i] != '':
-                if ',' in line[i] or 'e' in line[i] :
+                if ',' in line[i] or 'e' in line[i] or 'E' in line[i]:
                     hyperparameters.append(float(line[i].replace(',','.')))
                 else:
                     hyperparameters.append(int(line[i]))

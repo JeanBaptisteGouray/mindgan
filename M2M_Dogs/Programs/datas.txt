@@ -1,5 +1,7 @@
 path = /home/elie.delplace/Datasets
 
+#path = /home/elie/Documents/Datasets
+
 classifier_AE = Cat_Dog
 AE = Cat_Dog
 

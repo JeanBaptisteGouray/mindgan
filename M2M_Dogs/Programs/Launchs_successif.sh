@@ -60,7 +60,13 @@ do
     fi
     echo -e $i '/' $nb_wgan 'training launched ' $launch ' | PID:' $PID 
 
-    ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch"
+    # ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch"
 
     sleep $sec
 done
+
+while [ -n "$PID" -a -e /proc/$PID ]
+        do
+            echo -ne '\rWait end of training!'
+            sleep $sec
+        done

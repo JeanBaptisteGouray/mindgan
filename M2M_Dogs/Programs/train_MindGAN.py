@@ -68,7 +68,7 @@ print('Hyperparameters = ', hyperparameters)
 save.save_tested_hyperparameters(hyperparameters)
 
 # Hyperparameters for the training
-[batch_size, num_workers, _, lr, beta1, beta2, gp, epsilon, c_iter, _] = list(hyperparameters.values())
+[z_size, lr, beta1, beta2, gp, epsilon] = list(hyperparameters.values())
 
 z_size = 128
 hyperparameters_AE = utils.recup_hyperparameters('../checkpoints/Best_AE/Hyperparameters.txt')
@@ -115,7 +115,7 @@ print('La taille des images est de : ({},{},{})'.format(nb_channels, height, wid
 print_every = len(train_loader)//1
 
 # Recuperation Decoder
-Decoder = models.Generator(height, width, z_size=z_size, latent_size = latent_size,mode='AE', nb_channels=nb_channels)
+Decoder = models.Generator(height, width, latent_size = latent_size,mode='AE', nb_channels=nb_channels)
 state_dict = torch.load('../checkpoints/Best_AE/Decoder.pth')
 Decoder.load_state_dict(state_dict)
 
