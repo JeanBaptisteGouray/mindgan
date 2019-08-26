@@ -26,7 +26,7 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
 np.random.seed(seed) 
 
-torch.backends.cudnn.benchmark = True
+# torch.backends.cudnn.benchmark = True
 batch_size = 128
 num_workers = 32
 pin_memory = True
@@ -60,7 +60,7 @@ if not os.path.exists(folder):
 print("Toutes les donnees sont enregistrees dans le dossier : " + folder)
 
 # Select hyperparameters for the training
-hyperparameters = utils.select_hyperparameters_row('./Hyperparameters.csv')
+hyperparameters = utils.select_hyperparameters('./Hyperparameters.csv')
 print('Hyperparameters = ', hyperparameters)
 
 # Add the hyparameters at the file Tested_hyperparameters.csv
@@ -70,7 +70,7 @@ save.save_tested_hyperparameters(hyperparameters)
 save.save_hyperparameters(hyperparameters, folder)
 
 # Hyperparameters for the training
-[lr, beta1, beta2, latent_size] = list(hyperparameters.values())
+[lr, beta1, beta2, latent_size, z_size] = list(hyperparameters.values())
 
 # Folders
 checkpoint_path = folder + '/checkpoints/'
@@ -108,7 +108,7 @@ print_every = len(train_loader)//1
 
 # Creation of the crtic and the generator
 Encoder = models.Critic(height, width, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
-Decoder = models.Generator(height, width, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
+Decoder = models.Generator(height, width, z_size, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
 
 # Creation of the classifier which uses to compute the FId and IS
 Classifier = models.MLP(nb_classes)

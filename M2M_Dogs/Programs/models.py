@@ -81,7 +81,7 @@ class Critic(nn.Module):
         return d_out_squared.mean()
 
 class Generator(nn.Module):
-    def __init__(self, height, width, z_size, conv_dim = 32, latent_size = 128,mode = None, nb_channels=1):
+    def __init__(self, height, width, z_size, conv_dim = 32, latent_size = 128, mode = None, nb_channels=1):
         super(Generator, self).__init__()
         self.conv_dim = conv_dim
         self.mode = mode

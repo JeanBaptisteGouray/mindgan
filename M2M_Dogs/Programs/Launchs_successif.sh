@@ -12,10 +12,9 @@ else
 fi
 
 fichier=${prog%.*}
-
-nb_wgan=`cat ../../Nb_lancement/$fichier.txt`
-
 fichier=${fichier#t*_}
+
+nb_wgan=`cat ../../Nb_lancement/${fichier%_*}.txt`
 
 if [ -d "../${fichier^}/Trainings" ]
 then
@@ -31,7 +30,7 @@ nb_wgan=$(($nb_wgan - $nb_wgan_test))
 echo 'Memoire libre minimum :' $mem_min
 echo 'Le PID est :' $$
 
-if [ ! -e "../Logs_$prog" ]
+if [ ! -d "../Logs_$prog" ]
 then
     mkdir ../Logs_$prog
 fi
@@ -60,7 +59,7 @@ do
     fi
     echo -e $i '/' $nb_wgan 'training launched ' $launch ' | PID:' $PID 
 
-    # ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch"
+    ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch"
 
     sleep $sec
 done
