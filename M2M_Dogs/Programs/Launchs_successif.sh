@@ -1,14 +1,25 @@
 #!/bin/bash
 
-if [ $# != '2' ]
+if [ $# != '2' -a $# != '3' ]
 then
     read -p "Combien de secondes voulez-vous attendre deux lancements ? " sec
     read -p "Quel script python voulez-vous lancer? " prog
     echo -- '\n'
-    launch_local=1
 else 
     sec=$1
     prog=$2
+fi
+
+if [ ! -z $3 ]
+then 
+    case $3 in
+        "LENS" | "Lens" | "lens") num_ligne=0
+            ;;
+        "Nvidia" | "NVIDIA" | "nvidia") num_ligne=1
+            ;;
+esac
+else 
+    num_ligne=0 
 fi
 
 fichier=${prog%.*}
@@ -27,7 +38,21 @@ fi
 
 nb_wgan=$(($nb_wgan - $nb_wgan_test))
 
-echo 'Memoire libre minimum :' $mem_min
+webhooks=`cat webhooks.txt`
+
+webhooks_possible=()
+
+for webhook in $webhooks
+do
+    webhooks_possible=( "${webhooks_possible[@]}" "$webhook" )
+done
+
+webhook=${webhooks_possible[num_ligne]#*:}
+
+unset webhooks webhooks_possible
+
+echo $webhook
+
 echo 'Le PID est :' $$
 
 if [ ! -d "../Logs_$prog" ]
@@ -59,7 +84,7 @@ do
     fi
     echo -e $i '/' $nb_wgan 'training launched ' $launch ' | PID:' $PID 
 
-    ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch"
+    ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch" $webhook
 
     sleep $sec
 done
@@ -68,4 +93,4 @@ while [ -n "$PID" -a -e /proc/$PID ]
         do
             echo -ne '\rWait end of training!'
             sleep $sec
-        done
+done

@@ -4,8 +4,10 @@ path = /home/lml-machine-learning/Datasets
 
 #path = /home/elie/Documents/Datasets
 
-classifier_AE = Cat_Dog
+Classifier_AE = Cat_Dog
 AE = Cat_Dog
 
-classifier_MindGAN = Dog_Breed
+Classifier_MindGAN = Dog_Breed
 MindGAN = Dog_Breed
+
+Vanilla = Dog_Breed

@@ -27,7 +27,7 @@ epochs = 100
 num_workers = 32
 pin_memory = True
 
-data_path, dataset = utils.recup_datas('classifier_AE')
+data_path, dataset = utils.recup_datas('Classifier_AE')
 
 print('Les datasets se trouvent a l\'emplacement :', data_path)
 print('Le dataset utilise est :', dataset)

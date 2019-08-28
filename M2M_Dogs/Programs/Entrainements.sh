@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sec=$1
+webhook=$2
 folder_log=../Logs_successifs
 
 python3 nb_lancement.py
@@ -12,7 +13,7 @@ fi
 
 echo 'PID :' $$
 
-nohup ./Launchs_successif.sh 30 classifier_AE.py &> $folder_log/log_succ_C_AE.log &
+nohup ./Launchs_successif.sh 30 classifier_AE.py $webhook &> $folder_log/log_succ_C_AE.log &
 
 PID=$!
 echo 'PID du Launchs_successif :' $PID
@@ -24,7 +25,7 @@ do
     wait=1
 done
 
-nohup ./Launchs_successif.sh 30 classifier_MindGAN.py &> $folder_log/log_succ_C_M.log &
+nohup ./Launchs_successif.sh 30 classifier_MindGAN.py $webhook &> $folder_log/log_succ_C_M.log &
 
 PID=$!
 echo 'PID du Launchs_successif :' $PID
@@ -36,7 +37,7 @@ do
     wait=1
 done
 
-nohup ./Launchs_successif.sh 30 train_AE.py &> $folder_log/log_succ_t_AE.log &
+nohup ./Launchs_successif.sh 30 train_AE.py $webhook &> $folder_log/log_succ_t_AE.log &
 
 PID=$!
 echo 'PID du Launchs_successif :' $PID
@@ -48,4 +49,4 @@ do
     wait=1
 done
 
-nohup ./Launchs_successif.sh 30 train_MindGAN.py  &> $folder_loglog_succ_t_M.log &
+nohup ./Launchs_successif.sh 30 train_MindGAN.py $webhook &> $folder_loglog_succ_t_M.log &

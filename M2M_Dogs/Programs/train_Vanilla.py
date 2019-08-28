@@ -31,7 +31,7 @@ epochs = 200
 num_workers = 32
 pin_memory = True
 
-data_path, dataset = utils.recup_datas('MindGAN')
+data_path, dataset = utils.recup_datas('Vanilla')
 
 print('Les datasets se trouvent a l\'emplacement :', data_path)
 print('Le dataset utilise est :', dataset)
@@ -42,7 +42,7 @@ if not os.path.exists(folder):
     os.makedirs(folder)
 
 if not os.path.exists(folder + '/Hyperparameters.csv'):
-    shutil.copyfile('../../Hyperparameters/Hyperparameters_mindgan.csv',  folder + '/Hyperparameters.csv')
+    shutil.copyfile('../../Hyperparameters/Hyperparameters_Vanilla.csv',  folder + '/Hyperparameters.csv')
 
 # Go to the folder MindGAN
 os.chdir(folder)
@@ -92,7 +92,7 @@ transform = transforms.Compose([transforms.Resize(140),
                                 ])
 
 # Encoding images and save them in folder AE_hyperparameters
-data_path, train_loader, _, nb_classes = utils.dataset(data_path, dataset, hyperparameters_AE, transform=transform, num_workers=num_workers, pin_memory=pin_memory)
+data_path, train_loader, _, nb_classes = utils.dataset(data_path, dataset, batch_size, transform=transform, num_workers=num_workers, pin_memory=pin_memory)
 
 image = next(iter(train_loader))[0][0]
 

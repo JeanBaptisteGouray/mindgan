@@ -27,7 +27,7 @@ epochs = 100
 num_workers = 32
 pin_memory = True
 
-data_path, dataset = utils.recup_datas('classifier_MindGAN')
+data_path, dataset = utils.recup_datas('Classifier_MindGAN')
 
 print('Les datasets se trouvent a l\'emplacement :', data_path)
 print('Le dataset utilise est :', dataset)

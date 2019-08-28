@@ -315,12 +315,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader(dataset=train_data,
                                                     batch_size=batch_size,
                                                     shuffle=True,
+                                                    drop_last=True,
                                                     num_workers=num_workers,
                                                     pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
@@ -334,12 +336,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
             nb_classe =10
@@ -352,12 +356,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory) 
             nb_classe = 10
@@ -370,12 +376,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
             
@@ -389,12 +397,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
         
@@ -408,12 +418,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
@@ -427,12 +439,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
@@ -446,12 +460,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
@@ -465,12 +481,14 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_loader = torch.utils.data.DataLoader( dataset=train_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
             test_loader = torch.utils.data.DataLoader(  dataset=test_data,
                                                         batch_size=batch_size,
                                                         shuffle=True,
+                                                        drop_last=True,
                                                         num_workers=num_workers,
                                                         pin_memory=pin_memory)
 
@@ -568,8 +586,8 @@ def dataset(data_path, dataset, batch_size, transform=transforms.Compose([transf
             train_data = datasets.ImageFolder(train_dir, transform=transform)
             test_data = datasets.ImageFolder(test_dir, transform=transform)
 
-            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
-            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, pin_memory=pin_memory)
+            train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers, pin_memory=pin_memory)
+            test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, drop_last=True, num_workers=num_workers, pin_memory=pin_memory)
 
             nb_classe = 120
         
