@@ -131,6 +131,19 @@ def save_log(epoch, time, c_loss, g_loss, IS, FID, folder) :
         with open(folder+'/log.csv', 'a') as fichier :
             fichier.write('{};{};{};{};{};{}\n'.format(epoch, time, c_loss, g_loss, IS, FID))
 
+def save_log_VAE(epoch, time, train_loss, test_loss, IS, FID, folder) :
+    """
+        Save epoch, time, c_loss, g_loss, IS, FID ine the log files log.csv
+        in the folder folder
+    """
+    if not os.path.exists(folder + '/log.csv'):
+        with open(folder+'/log.csv', 'w') as fichier :
+            fichier.write('epoch ;time ;train_loss ;test_loss ;IS ;FID \n')
+            fichier.write('{};{};{};{};{};{}\n'.format(epoch, time, train_loss, test_loss, IS, FID))
+    else:
+        with open(folder+'/log.csv', 'a') as fichier :
+            fichier.write('{};{};{};{};{};{}\n'.format(epoch, time, train_loss, test_loss, IS, FID))
+
 
 def save_log_AE(epoch, time, train_loss, test_loss, FID, folder) :
     """
