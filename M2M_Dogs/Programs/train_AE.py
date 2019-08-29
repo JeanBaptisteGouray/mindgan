@@ -19,7 +19,18 @@ if not os.path.exists('../checkpoints/Best_Clas_AE/Hyperparameters.txt'):
     print('Veuillez entrainer un classifieur pour AutoEncoder!!')
     exit()
 
-epochs = 1
+seed = 56356274
+
+torch.manual_seed(seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(seed)
+np.random.seed(seed) 
+
+# torch.backends.cudnn.benchmark = True
+batch_size = 128
+num_workers = 32
+pin_memory = True
+epochs = 200
 
 data_path, dataset = utils.recup_datas('AE')
 
@@ -49,16 +60,17 @@ if not os.path.exists(folder):
 print("Toutes les donnees sont enregistrees dans le dossier : " + folder)
 
 # Select hyperparameters for the training
-hyperparameters_AE = utils.select_hyperparameters_row('./Hyperparameters.csv')
+hyperparameters = utils.select_hyperparameters('./Hyperparameters.csv')
+print('Hyperparameters = ', hyperparameters)
 
 # Add the hyparameters at the file Tested_hyperparameters.csv
-save.save_tested_hyperparameters(hyperparameters_AE)
+save.save_tested_hyperparameters(hyperparameters)
 
 # Save the hyperparameters for the training
-save.save_hyperparameters(hyperparameters_AE, folder)
+save.save_hyperparameters(hyperparameters, folder)
 
 # Hyperparameters for the training
-[batch_size, num_workers, z_size, lr, beta1, beta2, latent_size] = list(hyperparameters_AE.values())
+[lr, beta1, beta2, latent_size, z_size] = list(hyperparameters.values())
 
 # Folders
 checkpoint_path = folder + '/checkpoints/'
@@ -78,9 +90,7 @@ transform = transforms.Compose([transforms.Resize(140),
                                 transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
                                 ])
                                 
-data_path, train_loader, test_loader = utils.dataset(data_path, dataset, batch_size, transform)
-
-nb_classes = len([f for f in os.listdir(data_path + '/test') if os.path.isdir(os.path.join(data_path + '/test', f))])
+data_path, train_loader, test_loader, nb_classes = utils.dataset(data_path, dataset, batch_size, transform, num_workers=num_workers, pin_memory=pin_memory)
 
 image = next(iter(train_loader))[0][0]
 
@@ -98,14 +108,13 @@ print_every = len(train_loader)//1
 
 # Creation of the crtic and the generator
 Encoder = models.Critic(height, width, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
-Decoder = models.Generator(height, width, z_size=z_size, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
+Decoder = models.Generator(height, width, z_size, latent_size = latent_size, mode='AE', nb_channels=nb_channels)
 
 # Creation of the classifier which uses to compute the FId and IS
-Classifier = models.Pretrain_Classifier(nb_classes)
+Classifier = models.MLP(nb_classes)
 state_dict = torch.load('../checkpoints/Best_Clas_AE/classifier.pth')
 Classifier.load_state_dict(state_dict)
 Classifier.eval()
-
 
 # Training on GPU if it's possible
 train_on_gpu = torch.cuda.is_available()
@@ -114,6 +123,7 @@ if train_on_gpu:
     # move models to GPU
     Encoder.cuda()
     Decoder.cuda()
+    Classifier.cuda()
     print('GPU available for training. Models moved to GPU. \n')
 else:
     print('Training on CPU.\n')
@@ -194,15 +204,15 @@ for epoch in range(epochs):
     Decoder.train()
     Encoder.train()
 
-    test_loss_min, affichage = save.save_model_test_loss(test_loss, test_loss_min, Encoder, Decoder, checkpoint_path, mode='AE')
-
     print('Epoch [{:5d}/{:5d}] | Time: {:.0f} | Training loss: {:6.4f} | Testing loss: {:6.4f} | FID: {:6.4f}'.format(
             epoch+1, epochs, time.time()-start, train_loss.item()/len(train_loader), test_loss.item()/len(test_loader),score_fid/len(test_loader)), end=' ')
     
+    test_loss_min, affichage = save.save_model_test_loss(test_loss, test_loss_min, Encoder, Decoder, checkpoint_path, mode='AE')
+
     if affichage:
         print('| Model saved')
     else:
         print()
 
 # Save critic, generator and hyperparameters if the IS_max or FID_min is better
-save.save_best_AE(test_loss,hyperparameters_AE, checkpoint_path)
+save.save_best_test_loss(test_loss_min, hyperparameters, checkpoint_path, mode='AE')

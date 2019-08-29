@@ -1,7 +1,13 @@
-/media/Data/Datasets
+#path = /home/elie.delplace/Datasets
 
-classifier_AE = Cat_Dog
+#path = /home/lml-machine-learning/Datasets
+
+path = /home/elie/Documents/Datasets
+
+Classifier_AE = Cat_Dog
 AE = Cat_Dog
 
-classifier_MindGAN = Dog_Breed
+Classifier_MindGAN = Dog_Breed
 MindGAN = Dog_Breed
+
+Vanilla = Dog_Breed

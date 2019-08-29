@@ -14,11 +14,7 @@ import evaluate
 import save
 
 if not os.path.exists('../checkpoints/Best_Clas_MindGAN/Hyperparameters.txt'):
-    print('Veuillez entrainer un classifieur pour MindGAN!!')
-    exit()
-
-if not os.path.exists('../checkpoints/Best_AE/Encoder.pth'):
-    print('Missing encoder file')
+    print('Veuillez entrainer un classifeur pour MindGAN!!')
     exit()
 
 seed = 56356274
@@ -30,22 +26,23 @@ np.random.seed(seed)
 
 # torch.backends.cudnn.benchmark = True
 
+batch_size = 128
 epochs = 200
 num_workers = 32
 pin_memory = True
 
-data_path, dataset = utils.recup_datas('MindGAN')
+data_path, dataset = utils.recup_datas('Vanilla')
 
 print('Les datasets se trouvent a l\'emplacement :', data_path)
 print('Le dataset utilise est :', dataset)
 
-folder = '../MindGAN'
+folder = '../Vanilla'
 
 if not os.path.exists(folder):
     os.makedirs(folder)
 
 if not os.path.exists(folder + '/Hyperparameters.csv'):
-    shutil.copyfile('../../Hyperparameters/Hyperparameters_mindgan.csv',  folder + '/Hyperparameters.csv')
+    shutil.copyfile('../../Hyperparameters/Hyperparameters_Vanilla.csv',  folder + '/Hyperparameters.csv')
 
 # Go to the folder MindGAN
 os.chdir(folder)
@@ -68,9 +65,8 @@ print('Hyperparameters = ', hyperparameters)
 save.save_tested_hyperparameters(hyperparameters)
 
 # Hyperparameters for the training
-[z_size, lr, beta1, beta2, gp, epsilon] = list(hyperparameters.values())
+[z_size, lr, beta1, beta2, gp, epsilon, c_iter] = list(hyperparameters.values())
 
-z_size = 128
 hyperparameters_AE = utils.recup_hyperparameters('../checkpoints/Best_AE/Hyperparameters.txt')
 latent_size = hyperparameters_AE['latent_size']
 
@@ -96,17 +92,15 @@ transform = transforms.Compose([transforms.Resize(140),
                                 ])
 
 # Encoding images and save them in folder AE_hyperparameters
-filename_encoded_images, nb_classes, height, width, nb_channels = utils.encode_images(data_path, dataset, hyperparameters_AE, transform=transform, num_workers=num_workers, pin_memory=pin_memory)
+data_path, train_loader, _, nb_classes = utils.dataset(data_path, dataset, batch_size, transform=transform, num_workers=num_workers, pin_memory=pin_memory)
 
-train_data =  utils.EncodedImages(filename_encoded_images, '.', transform=transform)
+image = next(iter(train_loader))[0][0]
 
-train_loader = torch.utils.data.DataLoader( dataset=train_data,
-                                            batch_size=batch_size,
-                                            shuffle=True,
-                                            num_workers=num_workers,
-                                            pin_memory=pin_memory,
-                                            drop_last=True)
-del train_data
+nb_channels = image.shape[0]
+height = image.shape[1]
+width = image.shape[2]
+
+del image
 
 print('Il y a {} classes'.format(nb_classes))
 print('La taille des images est de : ({},{},{})'.format(nb_channels, height, width))
@@ -114,14 +108,10 @@ print('La taille des images est de : ({},{},{})'.format(nb_channels, height, wid
 # Parameter for the print
 print_every = len(train_loader)//1
 
-# Recuperation Decoder
-Decoder = models.Generator(height, width, latent_size = latent_size,mode='AE', nb_channels=nb_channels)
-state_dict = torch.load('../checkpoints/Best_AE/Decoder.pth')
-Decoder.load_state_dict(state_dict)
 
 # Creation of the crtic and the generator
-C = models.Critic(height, width, latent_size = latent_size, mode='MindGAN', nb_channels=nb_channels)
-G = models.Generator(height, width, z_size=z_size, latent_size = latent_size, mode='MindGAN', nb_channels=nb_channels)
+C = models.Critic(height, width, latent_size = latent_size, nb_channels=nb_channels)
+G = models.Generator(height, width, z_size, latent_size = latent_size,nb_channels=nb_channels)
 
 
 # Creation of the classifier which uses to compute the FID and IS
@@ -138,7 +128,6 @@ if train_on_gpu:
     # move models to GPU
     G.cuda()
     C.cuda()
-    Decoder.cuda()
     Classifier.cuda()
     print('GPU available for training. Models moved to GPU. \n')
 else:
@@ -157,19 +146,17 @@ start = time.time()
 
 # Training
 for epoch in range(epochs):
-    for ii, sample in enumerate(train_loader):
-        
-        encoded_images = sample['image'].float()
+    for ii, (real_images, _) in enumerate(train_loader):
         
         # Reset the gradient
         c_optimizer.zero_grad()
 
-        # Move encoded_images on GPU if we train on GPU
+        # Move real_images on GPU if we train on GPU
         if train_on_gpu:
-            encoded_images = encoded_images.cuda()
+            real_images = real_images.cuda()
 
         # Computing the critic loss for real images
-        c_real_loss = C.expectation_loss(encoded_images)
+        c_real_loss = C.expectation_loss(real_images)
 
         # Randomly generation of images
         z = np.random.uniform(-1, 1, size=(batch_size, z_size))
@@ -180,14 +167,14 @@ for epoch in range(epochs):
             z = z.cuda()
 
         # Generation of fake_images by the genrator
-        fake_encoded_images = G.forward(z)
+        fake_images = G.forward(z)
 
         # Computing the critic loss for fake images
-        c_fake_loss = C.expectation_loss(fake_encoded_images)
+        c_fake_loss = C.expectation_loss(fake_images)
 
         # Computing gradient penalty and epsilon penalty
-        gradient_penalty = C.calculate_gradient_penalty(encoded_images,fake_encoded_images,train_on_gpu)
-        epsilon_penalty = C.calculate_epsilon_penalty(encoded_images)
+        gradient_penalty = C.calculate_gradient_penalty(real_images,fake_images,train_on_gpu)
+        epsilon_penalty = C.calculate_epsilon_penalty(real_images)
 
         # Compute the critic loss
         C_loss = - c_real_loss + c_fake_loss + gp * gradient_penalty + epsilon * epsilon_penalty
@@ -200,8 +187,6 @@ for epoch in range(epochs):
         # Computing FID and FID_max, save the model ans FID if FID is better
         if (ii+1) == len(train_loader):
 
-            real_images = Decoder.forward(encoded_images)
-            fake_images = Decoder.forward(fake_encoded_images)
             score_IS = evaluate.inception_score(fake_images,Classifier)
             score_FID = evaluate.fid(real_images, fake_images, Classifier)
         
@@ -220,10 +205,10 @@ for epoch in range(epochs):
                 z = z.cuda()
 
             # Generation of fake_images by the genrator    
-            fake_encoded_images = G.forward(z)
+            fake_images = G.forward(z)
 
             # Compute the generator loss
-            G_loss = - C.expectation_loss(fake_encoded_images)
+            G_loss = - C.expectation_loss(fake_images)
 
             # One step in the gradient's descent
             G_loss.backward()

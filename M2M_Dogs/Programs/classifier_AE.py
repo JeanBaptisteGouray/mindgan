@@ -12,9 +12,22 @@ import os
 import numpy as np
 import time
 import shutil
-import collections
 
-data_path, dataset = utils.recup_datas('classifier_AE')
+seed = 56356274
+
+torch.manual_seed(seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(seed)
+np.random.seed(seed) 
+
+torch.backends.cudnn.benchmark = True
+
+batch_size = 128
+epochs = 100
+num_workers = 32
+pin_memory = True
+
+data_path, dataset = utils.recup_datas('Classifier_AE')
 
 print('Les datasets se trouvent a l\'emplacement :', data_path)
 print('Le dataset utilise est :', dataset)
@@ -30,6 +43,7 @@ if not os.path.exists(folder + '/Hyperparameters.csv'):
 os.chdir(folder)
 
 training_folder = 'Trainings/'
+
 # Folder where trainings are saved
 if not os.path.exists(training_folder):
     os.makedirs(training_folder)
@@ -52,8 +66,8 @@ save.save_hyperparameters(hyperparameters, folder)
 save.save_tested_hyperparameters(hyperparameters)
 
 # Hyperparameters for the training
-[batch_size, num_workers, conv_dim, lr, beta1, beta2, epochs] = list(hyperparameters.values())
-epochs = 5
+[lr, beta1, beta2] = list(hyperparameters.values())
+
 # Folders
 checkpoint_path = folder + '/checkpoints/'
 
@@ -67,9 +81,7 @@ transform = transforms.Compose([transforms.Resize(140),
                                 transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
                                 ])
 
-data_path, train_loader, test_loader = utils.dataset(data_path, dataset, batch_size, transform)
-
-nb_classes = len([f for f in os.listdir(data_path + '/test') if os.path.isdir(os.path.join(data_path + '/test', f))])
+data_path, train_loader, test_loader, nb_classes = utils.dataset(data_path, dataset, batch_size, transform, num_workers=num_workers, pin_memory=pin_memory)
 
 image = next(iter(train_loader))[0][0]
 
@@ -83,7 +95,7 @@ print('Il y a {} classes'.format(nb_classes))
 print('La taille des images est de : ({},{},{})'.format(nb_channels, height, width))
 
 # Create the Neural networks
-model = models.Pretrain_Classifier(nb_classes)
+model = models.MLP(nb_classes)
 
 # Trainig on GPU if it's possible
 train_on_gpu = torch.cuda.is_available()
@@ -96,7 +108,7 @@ else:
     print('Training on CPU. \n')
 
 # Define optimizer and loss function
-optimizer = optim.Adam(model.classifier.parameters(),lr, [beta1,beta2])
+optimizer = optim.Adam(model.parameters(),lr, [beta1,beta2])
 
 criterion = nn.NLLLoss()
 

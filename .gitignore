@@ -215,5 +215,8 @@ M2M_Dogs/Classifier_AE/
 M2M_Dogs/Classifier_MindGAN/
 M2M_Dogs/AE/
 M2M_Dogs/MindGAN/
+M2M_Dogs/Results
+M2M_Dogs/VAE
 
 M2M_Dogs/Programs/datas.txt
+\.vscode/
