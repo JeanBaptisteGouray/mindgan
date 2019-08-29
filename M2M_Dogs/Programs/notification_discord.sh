@@ -1,6 +1,6 @@
 #!/bin/bash
 message="$1"
-url=$2
+url="$2"
 
 msg_content=\"$message\"
 

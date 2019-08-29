@@ -194,62 +194,6 @@ class MLP(nn.Module):
             
         return x
 
-class VAE(nn.Module):
-    def __init__(self, height, width, conv_dim = 32, latent_size = 20, nb_channels=1):
-        super(VAE, self).__init__()
-        self.conv_dim = conv_dim
-        self.height = height
-        self.width = width
-        #Encode
-        self.conv1 = conv(nb_channels,conv_dim,4,2,1)       # height/2, width/2
-        self.conv2 = conv(conv_dim,2*conv_dim,4,2,1)        # height/4, width/4
-        self.conv3 = conv(2*conv_dim,4*conv_dim,4,2,1)      # height/8, width/8
-        self.conv4 = conv(4*conv_dim,8*conv_dim,4,2,1)      # height/16, width/16
-        self.fc11 = nn.Linear(int(height/16)*int(width/16)*8*conv_dim,latent_size)
-        self.fc12 = nn.Linear(int(height/16)*int(width/16)*8*conv_dim,latent_size)    
-
-        #Decode
-        self.fc3 = nn.Linear(latent_size,int(self.height/16)*int(self.width/16)*8*conv_dim)
-        self.Tconv1 = Tconv(8*conv_dim,4*conv_dim,2,2,0)                            # height/8, widht/8
-        self.Tconv2 = Tconv(4*conv_dim,4*conv_dim,2,2,0)                              # height/2, width/2
-        self.Tconv3 = Tconv(4*conv_dim,2*conv_dim,2,2,0)
-        self.Tconv4 = Tconv(2*conv_dim,nb_channels,2,2,0,batch_norm=False)            # height, width
-        self.tanh = nn.Tanh()
-
-    def encode(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = x.view(x.shape[0],-1)
-        x1 = self.fc11(x)
-        x2 = self.fc12(x)
-
-        return x1, x2
-
-    def decode(self, x):
-        x = F.relu(self.fc3(x))
-        x = x.view(x.shape[0], 8*self.conv_dim, int(self.height/16), int(self.width/16))
-        x = F.relu(self.Tconv1(x))
-        x = F.relu(self.Tconv2(x))
-        x = F.relu(self.Tconv3(x))
-        x = self.tanh(self.Tconv4(x))
-        return x
-
-    def reparametrize(self, mu, logvar):
-        std = logvar.mul(0.5).exp_()
-        if torch.cuda.is_available():
-            eps = torch.cuda.FloatTensor(std.size()).normal_()
-        else:
-            eps = torch.FloatTensor(std.size()).normal_()
-        eps = Variable(eps)
-        return eps.mul(std).add_(mu)
-
-    def forward(self, x):
-        mu, logvar = self.encode(x)
-        z = self.reparametrize(mu, logvar)
-        return self.decode(z), mu, logvar
-
 
 # def Pretrain_Classifier(nb_classes, transfer = None,hidden_units = [1024]):
 

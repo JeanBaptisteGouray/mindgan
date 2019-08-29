@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source ~/anaconda3/etc/profile.d/conda.sh
+conda activate pytorch
+
 if [ $# != '2' -a $# != '3' ]
 then
     read -p "Combien de secondes voulez-vous attendre deux lancements ? " sec
@@ -17,7 +20,7 @@ then
             ;;
         "Nvidia" | "NVIDIA" | "nvidia") num_ligne=1
             ;;
-esac
+    esac
 else 
     num_ligne=0 
 fi
@@ -51,8 +54,6 @@ webhook=${webhooks_possible[num_ligne]#*:}
 
 unset webhooks webhooks_possible
 
-echo $webhook
-
 echo 'Le PID est :' $$
 
 if [ ! -d "../Logs_$prog" ]
@@ -84,7 +85,7 @@ do
     fi
     echo -e $i '/' $nb_wgan 'training launched ' $launch ' | PID:' $PID 
 
-    ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch" $webhook
+    ./notification_discord.sh "$i / $nb_wgan | Lancement d'un nouvel entrainement de $prog le $launch" "$webhook"
 
     sleep $sec
 done

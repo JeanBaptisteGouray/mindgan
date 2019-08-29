@@ -1,2 +1,2 @@
-Lens:'https://discordapp.com/api/webhooks/616247738249641984/YN3_qTb1YgCCT3rZRtlnrVtucCAOLJyZZiwgwu5_DQ9gQ-9sRH5zsVjEPCZ-sPWa1P0-'
-Nvidia:'https://discordapp.com/api/webhooks/611204230539378709/UFDmzn-YcNBrizjftcbLwQEj4kBo9wA47wAS1BfibNLn_PdlfXDmoGM42eKPmM8_evCB'
+Lens:https://discordapp.com/api/webhooks/616247738249641984/YN3_qTb1YgCCT3rZRtlnrVtucCAOLJyZZiwgwu5_DQ9gQ-9sRH5zsVjEPCZ-sPWa1P0-
+Nvidia:https://discordapp.com/api/webhooks/611204230539378709/UFDmzn-YcNBrizjftcbLwQEj4kBo9wA47wAS1BfibNLn_PdlfXDmoGM42eKPmM8_evCB
