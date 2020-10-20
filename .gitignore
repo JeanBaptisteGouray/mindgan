@@ -1,6 +1,6 @@
 
-# Created by https://www.gitignore.io/api/linux,macos,python,windows,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=linux,macos,python,windows,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/python,vscode,linux,windows,macos
+# Edit at https://www.toptal.com/developers/gitignore?templates=python,vscode,linux,windows,macos
 
 ### Linux ###
 *~
@@ -95,8 +95,10 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+*.py,cover
 .hypothesis/
 .pytest_cache/
+pytestdebug.log
 
 # Translations
 *.mo
@@ -117,6 +119,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+doc/_build/
 
 # PyBuilder
 target/
@@ -138,8 +141,12 @@ ipython_config.py
 #   install all needed dependencies.
 #Pipfile.lock
 
-# celery beat schedule file
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
 celerybeat-schedule
+celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
@@ -152,6 +159,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+pythonenv*
 
 # Spyder project settings
 .spyderproject
@@ -171,16 +179,19 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-### VisualStudioCode ###
+# pytype static type analyzer
+.pytype/
+
+# profiling data
+.prof
+
+### vscode ###
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-.history
+*.code-workspace
 
 ### Windows ###
 # Windows thumbnail cache files
@@ -208,15 +219,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.gitignore.io/api/linux,macos,python,windows,visualstudiocode
-
-#Adding personnal folders
-M2M_Dogs/Classifier_AE/
-M2M_Dogs/Classifier_MindGAN/
-M2M_Dogs/AE/
-M2M_Dogs/MindGAN/
-M2M_Dogs/Results
-M2M_Dogs/VAE
-
-M2M_Dogs/Programs/datas.txt
-\.vscode/
+# End of https://www.toptal.com/developers/gitignore/api/python,vscode,linux,windows,macos
